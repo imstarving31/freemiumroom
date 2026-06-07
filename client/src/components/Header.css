@@ -1,0 +1,469 @@
+.main-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* header-container is deprecated; layout is now full-width on main-header */
+
+.logo-brand {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0c4a6e;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+
+/* Central Search Bar in Header */
+.header-search-bar-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 40px;
+  padding: 4px 4px 4px 16px;
+  flex: 1;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.header-search-bar-center:focus-within {
+  background-color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.08);
+}
+
+.header-search-input-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.search-icon-left {
+  color: #64748b;
+  pointer-events: none;
+}
+
+.header-search-input {
+  border: none;
+  background: none;
+  outline: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 600;
+  color: #0f172a;
+  width: 100%;
+}
+
+.header-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.header-filter-trigger-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0284c7;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.header-filter-trigger-btn:hover {
+  background-color: #0369a1;
+}
+
+.header-filter-trigger-btn:active {
+  transform: scale(0.98);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+/* Header Text Links (Tin đã lưu, Quản lý) */
+.header-text-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: #475569;
+  font-weight: 600;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.header-text-link:hover {
+  color: #0284c7;
+}
+
+/* Auth Buttons */
+.login-link-btn {
+  color: #475569;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.login-link-btn:hover {
+  color: #0284c7;
+}
+
+.register-link-btn {
+  text-decoration: none;
+  border: 1.5px solid #0284c7;
+  color: #0284c7;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  transition: all 0.2s ease;
+}
+
+.register-link-btn:hover {
+  background-color: #0284c7;
+  color: #ffffff;
+}
+
+.post-free-btn {
+  text-decoration: none;
+  background-color: #0f2e54;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 30px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 4px 6px -1px rgba(15, 46, 84, 0.1), 0 2px 4px -1px rgba(15, 46, 84, 0.06);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.post-free-btn:hover {
+  background-color: #09203c;
+  transform: translateY(-1px);
+}
+
+.icon-action-btn {
+  background: none;
+  border: none;
+  color: #475569;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.icon-action-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* User Trigger Area */
+.user-profile-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.user-profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.user-profile-trigger:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.user-avatar-small {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #0284c7;
+}
+
+.user-name-small {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-caret {
+  color: #64748b;
+  transition: transform 0.2s ease;
+}
+
+.dropdown-caret.open {
+  transform: rotate(180deg);
+}
+
+/* User Dropdown Menu (Premium Dark/Gray design) */
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background-color: #1e293b; /* Dark slate background */
+  border: 1px solid #334155;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  z-index: 200;
+  animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  color: #f1f5f9;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdown-block {
+  padding: 16px;
+  border-bottom: 1px solid #334155;
+}
+
+.dropdown-block:last-child {
+  border-bottom: none;
+}
+
+/* Block 1: Profile info */
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dropdown-avatar-large {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #0284c7;
+}
+
+.profile-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: #ffffff;
+  text-align: left;
+}
+
+.profile-phone {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+  text-align: left;
+}
+
+/* Block 2: Balance & Deposit */
+.profile-balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #0f172a; /* Even darker zone for balance card */
+}
+
+.balance-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.balance-label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.balance-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #eab308; /* Bright gold balance text */
+}
+
+.deposit-btn {
+  background-color: #eab308; /* Yellow accent button */
+  color: #0f172a;
+  border: none;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.deposit-btn:hover {
+  background-color: #facc15;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(234, 179, 8, 0.2);
+}
+
+/* Block 3: Navigation & Logout */
+.dropdown-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  text-decoration: none;
+  color: #cbd5e1;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background-color: #334155;
+  color: #ffffff;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #334155;
+  margin: 6px 4px;
+}
+
+.dropdown-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 10px 12px;
+  color: #f87171; /* red accent */
+  text-align: left;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.dropdown-logout-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+}
+
+@media (max-width: 768px) {
+  .main-header {
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding: 16px !important;
+  }
+
+  .nav-menu {
+    gap: 16px;
+  }
+}
+
+/* Tailwind CSS Utilities for Header */
+.w-full {
+  width: 100% !important;
+}
+.bg-white {
+  background-color: #ffffff !important;
+}
+.flex {
+  display: flex !important;
+}
+.justify-between {
+  justify-content: space-between !important;
+}
+.items-center {
+  align-items: center !important;
+}
+.px-8 {
+  padding-left: 2rem !important; /* 32px */
+  padding-right: 2rem !important;
+}
+.py-3 {
+  padding-top: 0.75rem !important; /* 12px */
+  padding-bottom: 0.75rem !important;
+}
+.border-b {
+  border-bottom: 1px solid #e5e7eb !important;
+}
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+.flex-shrink-0 {
+  flex-shrink: 0 !important;
+}
+.flex-1 {
+  flex: 1 1 0% !important;
+}
+.max-w-2xl {
+  max-width: 42rem !important; /* 672px */
+}
+.mx-8 {
+  margin-left: 2rem !important; /* 32px */
+  margin-right: 2rem !important;
+}
+.gap-6 {
+  gap: 1.5rem !important; /* 24px */
+}

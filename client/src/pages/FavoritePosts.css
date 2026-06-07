@@ -1,0 +1,122 @@
+.favorites-page {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #1e293b;
+  background-color: #f8fafc;
+  min-height: 80vh;
+  padding: 40px 24px;
+}
+
+.favorites-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.favorites-header {
+  max-width: 48rem;
+  margin: 0 auto 32px auto;
+  text-align: left;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  transition: color 0.2s;
+}
+
+.back-btn:hover {
+  color: #0284c7;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.heart-icon-title {
+  flex-shrink: 0;
+}
+
+.favorites-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.favorites-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.favorites-loading, .favorites-error, .favorites-empty {
+  text-align: center;
+  padding: 60px 24px;
+  color: #64748b;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  max-width: 48rem;
+  margin: 0 auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.favorites-loading .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #0284c7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+.favorites-empty .empty-icon {
+  color: #94a3b8;
+  margin-bottom: 16px;
+}
+
+.favorites-empty h3 {
+  font-size: 20px;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.favorites-empty p {
+  color: #64748b;
+  font-size: 14px;
+  max-width: 400px;
+  margin: 0 auto 24px auto;
+  line-height: 1.5;
+}
+
+.explore-btn {
+  display: inline-block;
+  background-color: #0284c7;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14.5px;
+  padding: 12px 28px;
+  border-radius: 30px;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.2);
+}
+
+.explore-btn:hover {
+  background-color: #0369a1;
+  transform: translateY(-1px);
+}
+
+.explore-btn:active {
+  transform: translateY(0);
+}

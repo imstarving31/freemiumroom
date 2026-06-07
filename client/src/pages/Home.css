@@ -1,0 +1,506 @@
+/* Home Page styling */
+
+.home-page {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #1e293b;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 1. Header Navigation (Moved to Header.css) */
+
+/* 2. Hero Section */
+.hero-banner {
+  background: linear-gradient(135deg, #1b3d68 0%, #0d2038 100%), 
+              url('https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1200&auto=format&fit=crop');
+  background-blend-mode: overlay;
+  background-size: cover;
+  background-position: center;
+  padding: 90px 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #ffffff;
+}
+
+.hero-content {
+  max-width: 850px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-title {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  font-weight: 500;
+  color: #cbd5e1;
+  margin-top: 0;
+  margin-bottom: 0;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* Filter Card */
+.search-filter-card {
+  background-color: #ffffff;
+  border-radius: 100px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 8px 10px 8px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 800px;
+  box-sizing: border-box;
+}
+
+.filter-item {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.filter-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 1px;
+}
+
+.filter-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #334155;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dropdown-arrow {
+  color: #64748b;
+}
+
+.filter-divider {
+  width: 1px;
+  height: 36px;
+  background-color: #e2e8f0;
+  margin: 0 20px;
+}
+
+.search-submit-btn {
+  background-color: #1e3b68;
+  color: #ffffff;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 100px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.search-submit-btn:hover {
+  background-color: #0f2444;
+}
+
+/* 3. Listings Section */
+.listings-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px 60px 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.title-block {
+  text-align: left;
+}
+
+.small-cap-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0284c7;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.main-section-heading {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+.see-all-link {
+  color: #0284c7;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.see-all-link:hover {
+  color: #0369a1;
+}
+
+/* Listings Statuses */
+.listings-loading, .listings-error, .listings-empty {
+  text-align: center;
+  padding: 60px 0;
+  color: #64748b;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px dashed #cbd5e1;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #0284c7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-icon {
+  color: #ef4444;
+  margin-bottom: 12px;
+}
+
+.empty-icon {
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.post-first-btn {
+  display: inline-block;
+  background-color: #0284c7;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 8px;
+  margin-top: 16px;
+  transition: background-color 0.2s;
+}
+
+.post-first-btn:hover {
+  background-color: #0369a1;
+}
+
+/* Listings Feed 1-Column Layout */
+.listings-feed-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  max-width: 48rem; /* equivalent to max-w-3xl (768px) */
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 4. How It Works Section */
+.how-it-works-section {
+  background-color: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.small-cap-center {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8b5cf6;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.center-section-heading {
+  font-size: 28px;
+  font-weight: 800;
+  color: #7c3aed;
+  margin-top: 4px;
+  margin-bottom: 40px;
+}
+
+.steps-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-around;
+  gap: 32px;
+}
+
+.step-card {
+  flex: 1;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-icon-wrapper {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.step-icon-wrapper.search-step {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.step-icon-wrapper.chat-step {
+  background-color: #f5f3ff;
+  color: #8b5cf6;
+}
+
+.step-icon-wrapper.rent-step {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+.step-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.step-description {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* 5. Banner & Stats Section */
+.banner-stats-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.banner-stats-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 24px;
+}
+
+/* Left Promo Banner */
+.promo-banner-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background-image: url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1000&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  padding: 60px 48px;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  min-height: 320px;
+  box-sizing: border-box;
+}
+
+.banner-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0.4) 60%, rgba(15, 23, 42, 0.1) 100%);
+  z-index: 1;
+}
+
+.banner-text-content {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+  max-width: 420px;
+}
+
+.banner-promo-title {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
+}
+
+.banner-promo-desc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #cbd5e1;
+  margin: 0 0 24px 0;
+}
+
+.banner-action-btn {
+  background-color: #ffffff;
+  color: #0f172a;
+  border: none;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.banner-action-btn:hover {
+  background-color: #f1f5f9;
+  transform: translateY(-1px);
+}
+
+/* Right Stats Cards Stack */
+.stats-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stat-card {
+  border-radius: 16px;
+  padding: 24px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.stat-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+}
+
+.stat-card-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Support Card (Blue/Navy Theme) */
+.support-card {
+  background-color: #0284c7;
+  color: #ffffff;
+}
+
+.support-card .stat-icon-circle {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.support-card .stat-card-desc {
+  color: #e0f2fe;
+}
+
+/* Verify Card (Pastel Purple Theme) */
+.verify-card {
+  background-color: #f3e8ff;
+  color: #581c87;
+  border: 1px solid #e9d5ff;
+}
+
+.verify-card .stat-icon-circle {
+  background-color: #e9d5ff;
+  color: #7c3aed;
+}
+
+.verify-card .stat-card-desc {
+  color: #6b21a8;
+}
+
+/* 6. Footer Section (Moved to Footer.css) */
+
+/* Responsive Rules */
+@media (max-width: 1024px) {
+  .listings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .banner-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 32px;
+  }
+
+  .search-filter-card {
+    border-radius: 24px;
+    flex-direction: column;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .filter-divider {
+    display: none;
+  }
+
+  .filter-item {
+    width: 100%;
+  }
+
+  .search-submit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .steps-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+}
+
