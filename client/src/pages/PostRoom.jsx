@@ -265,6 +265,10 @@ export default function PostRoom() {
     setShowConfirmModal(false);
 
     const fullAddress = getFullAddress();
+    const provinceName = selectedProvObj?.name || '';
+    const districtName = selectedDistObj?.name || '';
+    const wardName = wardsList.find(w => w.code === Number(selectedWard))?.name || '';
+    const exactAddr = [houseNumber.trim(), street.trim()].filter(Boolean).join(', ');
 
     // Create FormData object for multipart/form-data upload
     const sendData = new FormData();
@@ -272,6 +276,10 @@ export default function PostRoom() {
     sendData.append('categoryID', formData.categoryId);
     sendData.append('title', formData.title.trim());
     sendData.append('address', fullAddress);
+    sendData.append('province', provinceName);
+    sendData.append('district', districtName);
+    sendData.append('ward', wardName);
+    sendData.append('exactAddress', exactAddr);
     sendData.append('price', formData.price);
     sendData.append('area', formData.area);
     sendData.append('contactName', formData.contactName.trim());

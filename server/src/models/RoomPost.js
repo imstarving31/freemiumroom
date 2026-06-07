@@ -25,6 +25,18 @@ const RoomPostSchema = new Schema({
     type: String,
     required: [true, 'Địa chỉ là bắt buộc']
   },
+  province: {
+    type: String
+  },
+  district: {
+    type: String
+  },
+  ward: {
+    type: String
+  },
+  exactAddress: {
+    type: String
+  },
   price: {
     type: Number,
     required: [true, 'Giá thuê là bắt buộc']
