@@ -14,6 +14,7 @@ const categoryRoutes = require('./src/routes/category.route');
 const userRoutes = require('./src/routes/user.route');
 const paymentRoutes = require('./src/routes/payment.route');
 const adminRoutes = require('./src/routes/admin.route');
+const statisticRoutes = require('./src/routes/statistic.route');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -32,6 +33,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/statistics', statisticRoutes);
 
 
 // Root route

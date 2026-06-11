@@ -15,6 +15,7 @@ import EditPost from './pages/EditPost';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AdminLayout from './layouts/AdminLayout';
+import Dashboard from './pages/Admin/Dashboard';
 import ApprovePosts from './pages/Admin/ApprovePosts';
 import ManageCategories from './pages/Admin/ManageCategories';
 import ManageUsers from './pages/Admin/ManageUsers';
@@ -77,6 +78,8 @@ function App() {
         {/* Admin Protected Routes with AdminLayout */}
         <Route element={<AdminRoute />}>
           <Route element={<AdminLayout />}>
+            <Route path="/admin" element={<Dashboard />} />
+            <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/approve-posts" element={<ApprovePosts />} />
             <Route path="/admin/categories" element={<ManageCategories />} />
             <Route path="/admin/users" element={<ManageUsers />} />

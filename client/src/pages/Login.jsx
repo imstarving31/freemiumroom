@@ -65,7 +65,7 @@ const Login = () => {
 
       toast.success('Đăng nhập thành công!');
       if (data.user && data.user.role === 'Admin') {
-        navigate('/admin/approve-posts');
+        navigate('/admin/dashboard');
       } else {
         navigate('/');
       }

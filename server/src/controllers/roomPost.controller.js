@@ -126,6 +126,20 @@ exports.createPost = async (req, res) => {
       savedPost = await newPost.save();
     }
 
+    // Phát tín hiệu thông báo cho Admin qua Socket.io
+    const io = req.app.get('socketio');
+    if (io && savedPost.status === 'Pending') {
+      const user = await User.findById(userID);
+      const userName = user ? user.fullName : 'Thành viên';
+      const rawTitle = title || '';
+      const shortTitle = rawTitle.length > 35 ? `${rawTitle.substring(0, 35)}...` : rawTitle;
+      io.emit('admin_notification', {
+        type: 'POST',
+        message: `User ${userName} vừa đăng phòng: ${shortTitle} chờ duyệt.`,
+        countType: 'pendingPosts'
+      });
+    }
+
     return res.status(201).json({
       success: true,
       message: 'Đăng tin thành công',

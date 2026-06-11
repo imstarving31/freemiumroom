@@ -133,8 +133,36 @@ exports.vnpayReturn = async (req, res) => {
       }
 
       if (responseCode === '00') {
+        // Cập nhật trạng thái nếu vẫn đang Pending (để hỗ trợ môi trường localhost/dev không nhận được IPN)
+        if (transaction.status === 'Pending') {
+          transaction.status = 'Success';
+          await transaction.save();
+
+          // Cộng tiền vào ví User
+          await User.findByIdAndUpdate(
+            transaction.userId,
+            { $inc: { balance: transaction.amount } }
+          );
+
+          // Phát tín hiệu thông báo cho Admin qua Socket.io
+          const io = req.app.get('socketio');
+          if (io) {
+            const user = await User.findById(transaction.userId);
+            const userName = user ? user.fullName : 'Thành viên';
+            const formattedAmount = transaction.amount.toLocaleString('vi-VN');
+            io.emit('admin_notification', {
+              type: 'PAYMENT',
+              message: `User ${userName} vừa nạp thành công ${formattedAmount} đ.`,
+              countType: 'newTransactions'
+            });
+          }
+        }
         return res.redirect('http://localhost:5173/wallet?status=success');
       } else {
+        if (transaction.status === 'Pending') {
+          transaction.status = 'Failed';
+          await transaction.save();
+        }
         return res.redirect('http://localhost:5173/wallet?status=failed');
       }
     } else {
@@ -187,6 +215,19 @@ exports.vnpayIpn = async (req, res) => {
           transaction.userId,
           { $inc: { balance: transaction.amount } }
         );
+
+        // Phát tín hiệu thông báo cho Admin qua Socket.io
+        const io = req.app.get('socketio');
+        if (io) {
+          const user = await User.findById(transaction.userId);
+          const userName = user ? user.fullName : 'Thành viên';
+          const formattedAmount = transaction.amount.toLocaleString('vi-VN');
+          io.emit('admin_notification', {
+            type: 'PAYMENT',
+            message: `User ${userName} vừa nạp thành công ${formattedAmount} đ.`,
+            countType: 'newTransactions'
+          });
+        }
 
         return res.status(200).json({ RspCode: '00', Message: 'Confirm Success' });
       } else {
@@ -329,6 +370,19 @@ exports.updateTransactionStatus = async (req, res) => {
       transaction.userId,
       { $inc: { balance: transaction.amount } }
     );
+
+    // Phát tín hiệu thông báo cho Admin qua Socket.io
+    const io = req.app.get('socketio');
+    if (io) {
+      const user = await User.findById(transaction.userId);
+      const userName = user ? user.fullName : 'Thành viên';
+      const formattedAmount = transaction.amount.toLocaleString('vi-VN');
+      io.emit('admin_notification', {
+        type: 'PAYMENT',
+        message: `User ${userName} vừa nạp thành công ${formattedAmount} đ.`,
+        countType: 'newTransactions'
+      });
+    }
 
     return res.status(200).json({
       success: true,

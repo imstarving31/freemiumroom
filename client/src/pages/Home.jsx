@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   Search,
   MessageSquare,
@@ -17,6 +18,7 @@ import RoomCard from '../components/RoomCard';
 import './Home.css';
 
 export default function Home() {
+  const { currentUser } = useAuth();
   const [posts, setPosts] = useState([]);
   const [vipSuggestions, setVipSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +26,12 @@ export default function Home() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (currentUser && currentUser.role === 'Admin') {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [currentUser, navigate]);
 
   // Check if any filters are active
   const hasActiveFilters =
