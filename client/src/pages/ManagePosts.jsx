@@ -42,7 +42,7 @@ export default function ManagePosts() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('http://localhost:5000/api/room-posts/me', {
+      const response = await fetch('http://localhost:5000/api/room-posts/my-posts', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -70,7 +70,7 @@ export default function ManagePosts() {
   // Handle Toggle Availability
   const handleToggleAvailability = async (postId, currentStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/room-posts/${postId}/availability`, {
+      const response = await fetch(`http://localhost:5000/api/room-posts/${postId}/toggle-availability`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,

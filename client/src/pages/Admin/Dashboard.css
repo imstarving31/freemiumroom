@@ -10,14 +10,22 @@
   margin: 0 auto;
 }
 
-/* Header Row */
-.dashboard-header-row {
+/* Title & Controls Layout */
+.dashboard-title-area {
+  margin-bottom: 18px;
+}
+
+.dashboard-controls-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 16px;
   margin-bottom: 28px;
-  gap: 20px;
+  width: 100%;
   flex-wrap: wrap;
+}
+
+.dashboard-controls-row .export-dropdown-wrapper {
+  margin-left: auto;
 }
 
 .dashboard-title {
@@ -470,3 +478,212 @@
 .text-red {
   color: #ef4444;
 }
+
+/* Upgraded statistics components styling */
+.dashboard-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.select-time-range {
+  appearance: none;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 36px 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.select-time-range:hover {
+  border-color: #94a3b8;
+  background-color: #f8fafc;
+}
+
+.select-time-range:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.export-dropdown-wrapper {
+  position: relative;
+}
+
+.export-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 6px;
+  z-index: 50;
+  min-width: 200px;
+  animation: slideDownFade 0.2s ease-out;
+}
+
+.export-dropdown-menu button {
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  font-weight: 550;
+  color: #334155;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.export-dropdown-menu button:hover {
+  background-color: #f1f5f9;
+  color: #2563eb;
+}
+
+.posts-bar-fill {
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
+}
+
+.posts-bar-fill:hover {
+  background: linear-gradient(180deg, #34d399 0%, #047857 100%) !important;
+  transform: scaleY(1.03);
+}
+
+.chart-loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 280px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Date Range Picker styling */
+.dashboard-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.custom-date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.custom-date-inputs:hover {
+  border-color: #94a3b8;
+}
+
+.date-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-input-group label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.date-input-group input[type="date"] {
+  border: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #334155;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.date-input-divider {
+  color: #cbd5e1;
+  font-weight: 300;
+  user-select: none;
+}
+
+.animate-fade-in {
+  animation: fadeInStats 0.25s ease-out forwards;
+}
+
+@keyframes fadeInStats {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Segmented time range tabs style */
+.stats-time-tabs {
+  display: flex;
+  background-color: #f1f5f9;
+  border-radius: 10px;
+  padding: 4px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.time-tab-btn {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.time-tab-btn:hover {
+  color: #0f172a;
+}
+
+.time-tab-btn.active {
+  background-color: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Inline custom date range layout */
+.dashboard-custom-range-inline {
+  display: flex;
+  align-items: center;
+}
+

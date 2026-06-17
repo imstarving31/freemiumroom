@@ -81,7 +81,7 @@
 
 .input-wrapper input {
   width: 100%;
-  padding: 14px 16px 14px 48px;
+  padding: 14px 16px 14px 48px !important;
   border-radius: 14px;
   border: 1.5px solid #e2e8f0;
   font-size: 15px;

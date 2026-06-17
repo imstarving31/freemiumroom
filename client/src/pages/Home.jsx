@@ -1,29 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Search,
   MessageSquare,
   CheckCircle,
-  PhoneCall,
-  ShieldCheck,
-  MapPin,
-  Maximize2,
-  ChevronDown,
-  ArrowRight,
   ShieldAlert,
   Info
 } from 'lucide-react';
 import RoomCard from '../components/RoomCard';
+import Pagination from '../components/Pagination';
 import './Home.css';
 
 export default function Home() {
   const { currentUser } = useAuth();
   const [posts, setPosts] = useState([]);
+  const [totalRooms, setTotalRooms] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [vipSuggestions, setVipSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingVip, setLoadingVip] = useState(false);
   const [error, setError] = useState(null);
+  const pageChangeTriggeredRef = useRef(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -53,10 +51,16 @@ export default function Home() {
         setLoading(true);
         setError(null);
 
-        const queryString = searchParams.toString();
-        const url = queryString
-          ? `http://localhost:5000/api/room-posts?${queryString}`
-          : 'http://localhost:5000/api/room-posts';
+        const params = new URLSearchParams(searchParams);
+        if (!params.has('limit')) {
+          params.set('limit', '6');
+        }
+        if (!params.has('page')) {
+          params.set('page', '1');
+        }
+
+        const queryString = params.toString();
+        const url = `http://localhost:5000/api/room-posts?${queryString}`;
 
         const response = await fetch(url);
         if (!response.ok) {
@@ -65,6 +69,8 @@ export default function Home() {
         const data = await response.json();
         if (data.success) {
           setPosts(data.data);
+          setTotalRooms(data.totalRooms || data.data.length);
+          setTotalPages(data.totalPages || 1);
         } else {
           throw new Error(data.message || 'Lỗi không xác định');
         }
@@ -85,7 +91,7 @@ export default function Home() {
       const fetchVipSuggestions = async () => {
         try {
           setLoadingVip(true);
-          const response = await fetch('http://localhost:5000/api/room-posts?postType=Tin+VIP');
+          const response = await fetch('http://localhost:5000/api/room-posts?postType=Tin+VIP&limit=3');
           if (response.ok) {
             const data = await response.json();
             if (data.success) {
@@ -102,15 +108,36 @@ export default function Home() {
     }
   }, [posts, loading]);
 
-  // Format price helper (e.g., 4500000 -> 4.5 triệu/tháng)
+  // Handle smooth scroll after new page posts are loaded and rendered in the DOM
+  useEffect(() => {
+    if (pageChangeTriggeredRef.current) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById('listings-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+      pageChangeTriggeredRef.current = false;
+      return () => clearTimeout(timer);
+    }
+  }, [posts]);
+
+  const handlePageChange = (newPage) => {
+    pageChangeTriggeredRef.current = true;
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('page', newPage);
+    navigate(`/?${newParams.toString()}`);
+  };
+
+  // Format price helper (e.g., 4.5 triệu/tháng)
   const formatPrice = (price) => {
     if (!price) return 'Liên hệ';
     const num = Number(price);
     if (num >= 1000000) {
       const million = num / 1000000;
-      return `${million.toLocaleString('vi-VN', { maximumFractionDigits: 1 })} tr/th`;
+      return `${million.toLocaleString('vi-VN', { maximumFractionDigits: 1 })} triệu/tháng`;
     }
-    return `${num.toLocaleString('vi-VN')} đ/th`;
+    return `${num.toLocaleString('vi-VN')} đ/tháng`;
   };
 
   return (
@@ -121,18 +148,12 @@ export default function Home() {
         <div className="section-header-row">
           <div className="title-block">
             <span className="small-cap-title">
-              {hasActiveFilters ? 'SEARCH RESULTS' : 'LATEST LISTINGS'}
+              {hasActiveFilters ? 'SEARCH RESULTS' : 'TIN ĐĂNG DÀNH CHO BẠN'}
             </span>
             <h2 className="main-section-heading">
-              {hasActiveFilters ? `Kết quả tìm kiếm (${posts.length} phòng)` : 'Phòng mới nhất dành cho bạn'}
+              {hasActiveFilters ? `Kết quả tìm kiếm (${totalRooms} phòng)` : 'Phòng trọ nổi bật & mới nhất'}
             </h2>
           </div>
-          {!hasActiveFilters && (
-            <a href="#tat-ca" className="see-all-link">
-              Xem tất cả phòng
-              <ArrowRight size={16} style={{ marginLeft: '4px' }} />
-            </a>
-          )}
         </div>
 
         {loading ? (
@@ -166,7 +187,7 @@ export default function Home() {
                 </div>
                 <div className="listings-feed-container">
                   {vipSuggestions.map((post, index) => (
-                    <RoomCard 
+                    <RoomCard
                       key={post._id}
                       post={post}
                       index={index}
@@ -179,17 +200,24 @@ export default function Home() {
             )}
           </div>
         ) : (
-          <div className="listings-feed-container">
-            {posts.map((post, index) => (
-              <RoomCard 
-                key={post._id}
-                post={post}
-                index={index}
-                formatPrice={formatPrice}
-                onViewDetail={() => navigate(`/room/${post._id}`)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="listings-feed-container">
+              {posts.map((post, index) => (
+                <RoomCard
+                  key={post._id}
+                  post={post}
+                  index={index}
+                  formatPrice={formatPrice}
+                  onViewDetail={() => navigate(`/room/${post._id}`)}
+                />
+              ))}
+            </div>
+            <Pagination
+              currentPage={parseInt(searchParams.get('page')) || 1}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </section>
 
@@ -201,8 +229,9 @@ export default function Home() {
 
         <div className="steps-container">
           <div className="step-card">
+            <span className="step-number-bg">01</span>
             <div className="step-icon-wrapper search-step">
-              <Search size={22} className="step-icon" />
+              <Search size={24} className="step-icon" />
             </div>
             <h4 className="step-title">1. Tìm kiếm</h4>
             <p className="step-description">
@@ -211,8 +240,9 @@ export default function Home() {
           </div>
 
           <div className="step-card">
+            <span className="step-number-bg">02</span>
             <div className="step-icon-wrapper chat-step">
-              <MessageSquare size={22} className="step-icon" />
+              <MessageSquare size={24} className="step-icon" />
             </div>
             <h4 className="step-title">2. Liên hệ</h4>
             <p className="step-description">
@@ -221,57 +251,14 @@ export default function Home() {
           </div>
 
           <div className="step-card">
+            <span className="step-number-bg">03</span>
             <div className="step-icon-wrapper rent-step">
-              <CheckCircle size={22} className="step-icon" />
+              <CheckCircle size={24} className="step-icon" />
             </div>
             <h4 className="step-title">3. Thuê phòng</h4>
             <p className="step-description">
               Tiến hành xem phòng thực tế và ký kết hợp đồng thuê nhà một cách an toàn, minh bạch.
             </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Banner & Stats Section */}
-      <section className="banner-stats-section">
-        <div className="banner-stats-grid">
-          {/* Main Visual Banner */}
-          <div className="promo-banner-card">
-            <div className="banner-image-overlay"></div>
-            <div className="banner-text-content">
-              <h3 className="banner-promo-title">
-                Trải nghiệm sống đẳng<br />cấp tại các căn hộ dịch<br />vụ
-              </h3>
-              <p className="banner-promo-desc">
-                Khám phá danh sách các căn hộ full nội thất, dịch vụ dọn dẹp chuyên nghiệp với mức giá ưu đãi nhất
-              </p>
-              <button className="banner-action-btn">Khám phá ngay</button>
-            </div>
-          </div>
-
-          {/* Right Cards Stack */}
-          <div className="stats-stack">
-            {/* Support 24/7 Card */}
-            <div className="stat-card support-card">
-              <div className="stat-icon-circle">
-                <PhoneCall size={20} />
-              </div>
-              <h4 className="stat-card-title">Hỗ trợ 24/7</h4>
-              <p className="stat-card-desc">
-                Đội ngũ chuyên viên luôn sẵn sàng giải đáp mọi thắc mắc của bạn trong quá trình tìm thuê.
-              </p>
-            </div>
-
-            {/* Verification 100% Card */}
-            <div className="stat-card verify-card">
-              <div className="stat-icon-circle">
-                <ShieldCheck size={20} />
-              </div>
-              <h4 className="stat-card-title">Xác thực 100%</h4>
-              <p className="stat-card-desc">
-                Mọi tin đăng đều được kiểm duyệt kỹ lưỡng để đảm bảo tính xác thực và an toàn.
-              </p>
-            </div>
           </div>
         </div>
       </section>

@@ -114,6 +114,49 @@
   margin-bottom: 36px;
 }
 
+.room-gallery-grid.single-image {
+  grid-template-columns: 1fr;
+}
+
+.room-gallery-grid.two-images {
+  grid-template-columns: 1fr 1fr;
+}
+
+.sub-image-wrapper {
+  position: relative;
+  height: calc(50% - 5px);
+  width: 100%;
+  overflow: hidden;
+}
+
+.sub-image-wrapper .img-gallery-side {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.gallery-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  pointer-events: none;
+}
+
+.sub-image-wrapper:hover .gallery-overlay {
+  background-color: rgba(0, 0, 0, 0.65);
+}
+
 .gallery-main-col {
   width: 100%;
   height: 100%;
@@ -419,18 +462,18 @@
 }
 
 .sidebar-price {
-  color: #0f172a;
+  color: #f97316; /* Warm Orange */
 }
 
 .price-num {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 800;
 }
 
 .price-unit {
-  font-size: 14px;
-  color: #475569;
-  font-weight: 500;
+  font-size: 15px;
+  color: #f97316;
+  font-weight: 600;
   margin-left: 2px;
 }
 
@@ -577,8 +620,8 @@
 .sidebar-verification-card {
   margin-top: 20px;
   padding: 16px;
-  background-color: #f8fafc;
-  border: 1px solid #cbd5e1;
+  background-color: #f0fdf4; /* Soft green */
+  border: 1px solid #bbf7d0; /* Soft green border */
   border-radius: 12px;
   display: flex;
   align-items: flex-start;
@@ -587,7 +630,7 @@
 }
 
 .shield-icon {
-  color: #0284c7;
+  color: #16a34a; /* Trust green */
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -595,7 +638,7 @@
 .verify-text {
   font-size: 12.5px;
   line-height: 1.5;
-  color: #475569;
+  color: #166534; /* Darker green for text readability */
   margin: 0;
 }
 
@@ -640,3 +683,124 @@
     border: 1px solid #cbd5e1;
   }
 }
+
+/* Share Copied color */
+.meta-action-btn.copied {
+  color: #16a34a !important;
+}
+
+/* Lightbox modal overlay styling */
+.room-lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  user-select: none;
+}
+
+.lightbox-close-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 36px;
+  cursor: pointer;
+  z-index: 10001;
+  transition: transform 0.2s, color 0.2s;
+  line-height: 1;
+}
+
+.lightbox-close-btn:hover {
+  color: #cbd5e1;
+  transform: scale(1.1);
+}
+
+.lightbox-arrow-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: #ffffff;
+  font-size: 54px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  transition: background-color 0.2s, transform 0.2s;
+  line-height: 1;
+}
+
+.lightbox-arrow-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.lightbox-arrow-btn.prev {
+  left: 32px;
+}
+
+.lightbox-arrow-btn.next {
+  right: 32px;
+}
+
+.lightbox-image-container {
+  max-width: 80%;
+  max-height: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.lightbox-main-img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: scaleIn 0.2s ease-out;
+}
+
+.lightbox-counter {
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 16px;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .lightbox-arrow-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 36px;
+  }
+  
+  .lightbox-arrow-btn.prev {
+    left: 12px;
+  }
+
+  .lightbox-arrow-btn.next {
+    right: 12px;
+  }
+}
+

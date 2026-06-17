@@ -23,20 +23,20 @@ import './ManageUsers.css';
 
 export default function ManageUsers() {
   const { token, currentUser } = useAuth();
-  
+
   // Table states
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
-  
+
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 500);
   const [statusFilter, setStatusFilter] = useState('All');
   const [roleFilter, setRoleFilter] = useState('All');
-  
+
   // Stats state
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -54,26 +54,26 @@ export default function ManageUsers() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      
+
       const statusParam = statusFilter === 'All' ? '' : statusFilter;
       const roleParam = roleFilter === 'All' ? '' : roleFilter;
-      
+
       const url = `http://localhost:5000/api/admin/users?page=${currentPage}&limit=10&search=${encodeURIComponent(debouncedSearch)}&status=${statusParam}&role=${roleParam}`;
-      
+
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       const result = await response.json();
-      
+
       if (!response.ok) {
         const errorObj = new Error(result.message || 'Không thể tải danh sách người dùng.');
         errorObj.response = { data: result };
         throw errorObj;
       }
-      
+
       setUsers(result.data || []);
       setTotalUsers(result.pagination?.total || 0);
       setTotalPages(result.pagination?.pages || 1);
@@ -113,10 +113,10 @@ export default function ManageUsers() {
   // Handle Lock/Unlock action submission
   const handleToggleBlock = async () => {
     if (!selectedUser) return;
-    
+
     try {
       setActionLoading(true);
-      
+
       const response = await fetch(`http://localhost:5000/api/admin/users/${selectedUser._id}/toggle-block`, {
         method: 'PATCH',
         headers: {
@@ -124,15 +124,15 @@ export default function ManageUsers() {
           'Content-Type': 'application/json'
         }
       });
-      
+
       const result = await response.json();
-      
+
       if (!response.ok) {
         const errorObj = new Error(result.message || 'Thay đổi trạng thái tài khoản thất bại.');
         errorObj.response = { data: result };
         throw errorObj;
       }
-      
+
       toast.success(result.message || 'Cập nhật trạng thái tài khoản thành công!');
       setShowConfirmModal(false);
       setSelectedUser(null);
@@ -166,7 +166,7 @@ export default function ManageUsers() {
   return (
     <div className="admin-users-page">
       <div className="admin-users-container">
-        
+
         {/* Page Title */}
         <div className="admin-title-row">
           <div>
@@ -177,7 +177,7 @@ export default function ManageUsers() {
 
         {/* Stats Summary Grid */}
         <div className="admin-stats-grid">
-          
+
           <div className="admin-stat-card">
             <div className="stat-icon-circle bg-blue">
               <Users className="text-blue" size={20} />
@@ -222,12 +222,12 @@ export default function ManageUsers() {
 
         {/* Search, Filter & Actions Bar */}
         <div className="table-actions-bar">
-          
+
           <div className="search-wrapper">
             <Search size={18} className="search-icon" />
-            <input 
-              type="text" 
-              placeholder="Tìm tên, email hoặc số điện thoại..." 
+            <input
+              type="text"
+              placeholder="Tìm tên, email hoặc số điện thoại..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
@@ -237,7 +237,7 @@ export default function ManageUsers() {
           <div className="filters-wrapper">
             <div className="filter-group">
               <label htmlFor="role-filter">Vai trò:</label>
-              <select 
+              <select
                 id="role-filter"
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
@@ -251,7 +251,7 @@ export default function ManageUsers() {
 
             <div className="filter-group">
               <label htmlFor="status-filter">Trạng thái:</label>
-              <select 
+              <select
                 id="status-filter"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -305,9 +305,9 @@ export default function ManageUsers() {
                         <td className="col-user-profile">
                           <div className="col-user-profile-flex">
                             <div className="user-avatar-wrapper">
-                              <img 
-                                src={user.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'} 
-                                alt={user.fullName} 
+                              <img
+                                src={user.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}
+                                alt={user.fullName}
                                 className="user-table-avatar"
                                 onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; }}
                               />
@@ -318,7 +318,7 @@ export default function ManageUsers() {
                             </div>
                           </div>
                         </td>
-                        
+
                         {/* Contact Info */}
                         <td className="col-user-contact">
                           <div className="col-user-contact-flex">
@@ -353,12 +353,12 @@ export default function ManageUsers() {
                           <div className="date-item">
                             <Calendar size={13} className="date-icon" />
                             <span>
-                              {user.createdAt 
+                              {user.createdAt
                                 ? new Date(user.createdAt).toLocaleDateString('vi-VN', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric'
-                                  })
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric'
+                                })
                                 : '---'
                               }
                             </span>
@@ -418,7 +418,7 @@ export default function ManageUsers() {
               <span className="pagination-summary">
                 Hiển thị trang <strong>{currentPage}</strong> / <strong>{totalPages}</strong> (Tổng số <strong>{totalUsers}</strong> thành viên)
               </span>
-              
+
               <div className="pagination-buttons">
                 <button
                   type="button"
@@ -428,9 +428,9 @@ export default function ManageUsers() {
                 >
                   <ChevronLeft size={16} />
                 </button>
-                
+
                 {renderPaginationNumbers()}
-                
+
                 <button
                   type="button"
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
@@ -450,12 +450,12 @@ export default function ManageUsers() {
       {showConfirmModal && selectedUser && (
         <div className="modal-backdrop-overlay">
           <div className="modal-content-card">
-            
+
             {/* Modal Header */}
             <div className={`modal-card-header ${selectedUser.isBlocked ? 'text-green-header' : 'text-red-header'}`}>
               <h3>{selectedUser.isBlocked ? 'Xác nhận Mở khóa tài khoản' : 'Xác nhận Khóa tài khoản'}</h3>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn-close-modal"
                 onClick={() => {
                   setShowConfirmModal(false);
@@ -469,7 +469,7 @@ export default function ManageUsers() {
             {/* Modal Body */}
             <div className="modal-card-body">
               <p>Bạn có chắc chắn muốn {selectedUser.isBlocked ? 'mở khóa' : 'khóa'} tài khoản của thành viên <strong>{selectedUser.fullName}</strong>?</p>
-              
+
               {selectedUser.isBlocked ? (
                 <div className="alert-message alert-info mt-3">
                   <UserCheck size={18} />
@@ -485,8 +485,8 @@ export default function ManageUsers() {
 
             {/* Modal Footer */}
             <div className="modal-card-footer">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn-secondary-cancel"
                 onClick={() => {
                   setShowConfirmModal(false);
@@ -496,8 +496,8 @@ export default function ManageUsers() {
               >
                 Hủy bỏ
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className={selectedUser.isBlocked ? 'btn-success-confirm' : 'btn-danger-confirm'}
                 onClick={handleToggleBlock}
                 disabled={actionLoading}

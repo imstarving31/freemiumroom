@@ -6,9 +6,10 @@ const verifyToken = require('../middlewares/verifyToken');
 
 router.post('/', verifyToken, uploadCloud.array('images', 10), roomPostController.createPost);
 router.get('/', roomPostController.getAllPosts);
-router.get('/me', verifyToken, roomPostController.getMyPosts);
+router.get('/my-posts', verifyToken, roomPostController.getMyPosts);
 router.get('/:id', roomPostController.getPostById);
-router.patch('/:id/availability', verifyToken, roomPostController.toggleAvailability);
+router.put('/:id', verifyToken, uploadCloud.array('images', 10), roomPostController.updatePost);
+router.patch('/:id/toggle-availability', verifyToken, roomPostController.toggleAvailability);
 router.delete('/:id', verifyToken, roomPostController.deletePost);
 
 module.exports = router;

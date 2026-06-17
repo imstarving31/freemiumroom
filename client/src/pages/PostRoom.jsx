@@ -18,7 +18,7 @@ export default function PostRoom() {
   const { token, currentUser, fetchCurrentUser } = useAuth();
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
-  
+
   // Filter categories dynamically
   const roomTypes = categories.filter(c => c.categoryType === 'Loại phòng');
   const utilitiesList = categories.filter(c => c.categoryType === 'Tiện ích');
@@ -33,7 +33,7 @@ export default function PostRoom() {
     description: '',
     postType: 'Tin thường',
   });
-  
+
   // State for dynamic address dropdowns
   const [provinces, setProvinces] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState('');
@@ -41,14 +41,14 @@ export default function PostRoom() {
   const [selectedWard, setSelectedWard] = useState('');
   const [street, setStreet] = useState('');
   const [houseNumber, setHouseNumber] = useState('');
-  
+
   // State for manual image URLs
   const [imageUrls, setImageUrls] = useState([]);
   const [imageUrlInput, setImageUrlInput] = useState('');
-  
+
   // State for physical files
   const [localFiles, setLocalFiles] = useState([]); // Array of { id, file, preview }
-  
+
   const [selectedUtilities, setSelectedUtilities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
@@ -65,14 +65,21 @@ export default function PostRoom() {
     }
   }, [currentUser]);
 
-  // Fetch provinces on mount
+  // Fetch provinces on mount with local storage caching
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
+        const cached = localStorage.getItem('vietnam_provinces');
+        if (cached) {
+          setProvinces(JSON.parse(cached));
+          return;
+        }
+
         const response = await fetch('https://provinces.open-api.vn/api/?depth=3');
         if (response.ok) {
           const data = await response.json();
           setProvinces(data);
+          localStorage.setItem('vietnam_provinces', JSON.stringify(data));
         }
       } catch (err) {
         console.error('Lỗi khi tải danh sách tỉnh thành:', err);
@@ -315,7 +322,7 @@ export default function PostRoom() {
 
       if (response.ok && data.success) {
         showToast('Đăng tin thành công, chờ admin duyệt', 'success');
-        
+
         // Refresh current user info to sync balance on Header
         if (fetchCurrentUser) {
           await fetchCurrentUser();
@@ -338,7 +345,7 @@ export default function PostRoom() {
         setSelectedWard('');
         setStreet('');
         setHouseNumber('');
-        
+
         // Revoke previews
         localFiles.forEach((item) => URL.revokeObjectURL(item.preview));
         setLocalFiles([]);
@@ -397,7 +404,7 @@ export default function PostRoom() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          
+
           {/* 1. Section: Khu vực */}
           <div id="khu-vuc" className="form-section">
             <h3 className="section-title">
@@ -409,7 +416,7 @@ export default function PostRoom() {
                 <label className="form-label">
                   Địa chỉ phòng trọ <span className="required">*</span>
                 </label>
-                
+
                 <div className="address-selectors-row">
                   <div className="select-wrapper">
                     <select
@@ -670,7 +677,7 @@ export default function PostRoom() {
               <ImageIcon size={18} className="section-icon" />
               Hình ảnh mô tả
             </h3>
-            
+
             <div className="images-uploader-grid">
               {/* Way 1: URL */}
               <div className="uploader-box">
@@ -831,16 +838,16 @@ export default function PostRoom() {
               Hệ thống sẽ khấu trừ <strong>20.000đ</strong> từ tài khoản của bạn cho dịch vụ này.
             </p>
             <div className="confirm-modal-actions">
-              <button 
-                type="button" 
-                className="confirm-btn-cancel" 
+              <button
+                type="button"
+                className="confirm-btn-cancel"
                 onClick={() => setShowConfirmModal(false)}
               >
                 Hủy
               </button>
-              <button 
-                type="button" 
-                className="confirm-btn-submit" 
+              <button
+                type="button"
+                className="confirm-btn-submit"
                 onClick={submitPostApi}
               >
                 Xác nhận thanh toán

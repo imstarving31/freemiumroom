@@ -124,7 +124,7 @@
 .listings-section {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 16px 24px 60px 24px;
+  padding: 40px 24px 60px 24px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -133,7 +133,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .title-block {
@@ -232,53 +232,112 @@
 
 /* 4. How It Works Section */
 .how-it-works-section {
-  background-color: #ffffff;
+  background-color: #f8fafc;
   border-top: 1px solid #e2e8f0;
   border-bottom: 1px solid #e2e8f0;
-  padding: 60px 24px;
+  padding: 80px 24px;
   text-align: center;
 }
 
 .small-cap-center {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  color: #8b5cf6;
-  letter-spacing: 1.5px;
+  color: #7c3aed;
+  letter-spacing: 2px;
   text-transform: uppercase;
 }
 
 .center-section-heading {
-  font-size: 28px;
-  font-weight: 800;
-  color: #7c3aed;
-  margin-top: 4px;
-  margin-bottom: 40px;
+  font-size: 32px;
+  font-weight: 900;
+  color: #0f172a;
+  margin-top: 6px;
+  margin-bottom: 48px;
+  letter-spacing: -0.5px;
 }
 
 .steps-container {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
   display: flex;
-  justify-content: space-around;
-  gap: 32px;
+  justify-content: space-between;
+  gap: 40px;
+  position: relative;
 }
 
 .step-card {
   flex: 1;
   max-width: 320px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 24px;
+  padding: 40px 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
+}
+
+/* Connector Lines between step cards in desktop view */
+.step-card:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 69px;
+  left: calc(100% + 8px);
+  width: 24px;
+  height: 2px;
+  border-top: 2px dashed #cbd5e1;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.step-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(124, 58, 237, 0.3);
+  background: #ffffff;
+  box-shadow: 0 20px 25px -5px rgba(124, 58, 237, 0.1), 0 8px 10px -6px rgba(124, 58, 237, 0.05);
+}
+
+.step-number-bg {
+  position: absolute;
+  top: -12px;
+  right: 12px;
+  font-size: 72px;
+  font-weight: 900;
+  color: #f1f5f9;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  z-index: 0;
+  transition: color 0.3s ease;
+}
+
+.step-card:hover .step-number-bg {
+  color: rgba(124, 58, 237, 0.08);
 }
 
 .step-icon-wrapper {
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.step-card:hover .step-icon-wrapper {
+  transform: scale(1.1);
+  box-shadow: 0 8px 16px -4px rgba(124, 58, 237, 0.15);
 }
 
 .step-icon-wrapper.search-step {
@@ -297,178 +356,27 @@
 }
 
 .step-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #0f172a;
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
+  position: relative;
+  z-index: 2;
 }
 
 .step-description {
   font-size: 13px;
   color: #64748b;
-  line-height: 1.5;
+  line-height: 1.6;
   margin: 0;
-}
-
-/* 5. Banner & Stats Section */
-.banner-stats-section {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 60px 24px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.banner-stats-grid {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 24px;
-}
-
-/* Left Promo Banner */
-.promo-banner-card {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  background-image: url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1000&auto=format&fit=crop');
-  background-size: cover;
-  background-position: center;
-  padding: 60px 48px;
-  display: flex;
-  align-items: center;
-  text-align: left;
-  min-height: 320px;
-  box-sizing: border-box;
-}
-
-.banner-image-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0.4) 60%, rgba(15, 23, 42, 0.1) 100%);
-  z-index: 1;
-}
-
-.banner-text-content {
   position: relative;
   z-index: 2;
-  color: #ffffff;
-  max-width: 420px;
 }
-
-.banner-promo-title {
-  font-size: 32px;
-  font-weight: 800;
-  line-height: 1.2;
-  margin: 0 0 12px 0;
-  letter-spacing: -0.5px;
-}
-
-.banner-promo-desc {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #cbd5e1;
-  margin: 0 0 24px 0;
-}
-
-.banner-action-btn {
-  background-color: #ffffff;
-  color: #0f172a;
-  border: none;
-  font-weight: 700;
-  font-size: 13px;
-  padding: 10px 24px;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-.banner-action-btn:hover {
-  background-color: #f1f5f9;
-  transform: translateY(-1px);
-}
-
-/* Right Stats Cards Stack */
-.stats-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.stat-card {
-  border-radius: 16px;
-  padding: 24px;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.stat-icon-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-
-.stat-card-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin: 0 0 6px 0;
-}
-
-.stat-card-desc {
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* Support Card (Blue/Navy Theme) */
-.support-card {
-  background-color: #0284c7;
-  color: #ffffff;
-}
-
-.support-card .stat-icon-circle {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-
-.support-card .stat-card-desc {
-  color: #e0f2fe;
-}
-
-/* Verify Card (Pastel Purple Theme) */
-.verify-card {
-  background-color: #f3e8ff;
-  color: #581c87;
-  border: 1px solid #e9d5ff;
-}
-
-.verify-card .stat-icon-circle {
-  background-color: #e9d5ff;
-  color: #7c3aed;
-}
-
-.verify-card .stat-card-desc {
-  color: #6b21a8;
-}
-
-/* 6. Footer Section (Moved to Footer.css) */
 
 /* Responsive Rules */
 @media (max-width: 1024px) {
   .listings-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .banner-stats-grid {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -501,6 +409,10 @@
     flex-direction: column;
     align-items: center;
     gap: 40px;
+  }
+
+  .step-card:not(:last-child)::after {
+    display: none;
   }
 }
 

@@ -156,21 +156,23 @@ exports.createPost = async (req, res) => {
 
 exports.getAllPosts = async (req, res) => {
   try {
-    const { 
-      searchTerm, 
-      minPrice, 
-      maxPrice, 
-      minArea, 
-      maxArea, 
-      district, 
-      utilities, 
+    const {
+      searchTerm,
+      minPrice,
+      maxPrice,
+      minArea,
+      maxArea,
+      district,
+      utilities,
       postType,
       categoryId,
       province,
       ward,
-      keyword
+      keyword,
+      page,
+      limit
     } = req.query;
-    
+
     let query = {};
     const conditions = [];
 
@@ -188,8 +190,8 @@ exports.getAllPosts = async (req, res) => {
     if (keyword) {
       conditions.push({
         $or: [
-          { title: { $regex: keyword, $options: 'i' } }, 
-          { address: { $regex: keyword, $options: 'i' } }, 
+          { title: { $regex: keyword, $options: 'i' } },
+          { address: { $regex: keyword, $options: 'i' } },
           { description: { $regex: keyword, $options: 'i' } }
         ]
       });
@@ -255,16 +257,30 @@ exports.getAllPosts = async (req, res) => {
       query = { $and: conditions };
     }
 
-    // Query and sort: Tin VIP (postType === 'Tin VIP') lên đầu, sau đó mới đến createdAt mới nhất.
-    const posts = await RoomPost.find(query)
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit);
+
+    let totalRooms = await RoomPost.countDocuments(query);
+    let totalPages = limitNum ? Math.ceil(totalRooms / limitNum) : 1;
+
+    let postsQuery = RoomPost.find(query)
       .populate('categoryId', 'categoryName')
       .populate('categoryID', 'categoryName')
       .populate('userID', 'fullName avatar phoneNumber')
       .sort({ postType: 1, createdAt: -1 });
 
+    if (limitNum) {
+      postsQuery = postsQuery.skip((pageNum - 1) * limitNum).limit(limitNum);
+    }
+
+    const posts = await postsQuery;
+
     return res.status(200).json({
       success: true,
-      data: posts
+      data: posts,
+      totalRooms,
+      totalPages,
+      currentPage: pageNum
     });
   } catch (error) {
     console.error('Error in getAllPosts controller:', error);
@@ -412,6 +428,196 @@ exports.deletePost = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message || 'Đã xảy ra lỗi khi xóa tin đăng.'
+    });
+  }
+};
+
+exports.updatePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mã phòng trọ không hợp lệ.'
+      });
+    }
+
+    const post = await RoomPost.findById(id);
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy thông tin phòng trọ.'
+      });
+    }
+
+    // Only post owner or Admin can edit
+    if (post.userID.toString() !== userId && userRole !== 'Admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Bạn không có quyền chỉnh sửa tin đăng này.'
+      });
+    }
+
+    const {
+      categoryID,
+      categoryId,
+      title,
+      address,
+      province,
+      district,
+      ward,
+      exactAddress,
+      price,
+      area,
+      contactName,
+      contactPhone,
+      description,
+      postType
+    } = req.body;
+
+    // Helper to parse array fields from FormData
+    const getArrayFromField = (val) => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      try {
+        const parsed = JSON.parse(val);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) { }
+      return [val].filter(item => typeof item === 'string' && item.trim().length > 0);
+    };
+
+    // Extract utility list
+    let utilityArray = [];
+    if (req.body.utilities) {
+      utilityArray = getArrayFromField(req.body.utilities);
+    } else if (req.body['utilities[]']) {
+      utilityArray = getArrayFromField(req.body['utilities[]']);
+    }
+
+    // --- Image merging ---
+    // 1. Existing images the user chose to keep
+    let existingImages = [];
+    if (req.body.existingImages) {
+      existingImages = getArrayFromField(req.body.existingImages);
+    } else if (req.body['existingImages[]']) {
+      existingImages = getArrayFromField(req.body['existingImages[]']);
+    }
+
+    // 2. New manual image URLs
+    let textImageUrls = [];
+    if (req.body.imageUrls) {
+      textImageUrls = getArrayFromField(req.body.imageUrls);
+    } else if (req.body['imageUrls[]']) {
+      textImageUrls = getArrayFromField(req.body['imageUrls[]']);
+    }
+
+    // 3. Newly uploaded files via Cloudinary
+    const fileUrls = req.files ? req.files.map(file => file.path || file.secure_url) : [];
+
+    // Merge all image sources
+    const mergedImages = [...existingImages, ...textImageUrls, ...fileUrls]
+      .filter(url => typeof url === 'string' && url.trim().length > 0);
+
+    const parseObjectId = (idVal) => {
+      if (idVal && mongoose.Types.ObjectId.isValid(idVal)) {
+        return new mongoose.Types.ObjectId(idVal);
+      }
+      return null;
+    };
+
+    const cleanPrice = price ? Number(price.toString().replace(/\D/g, '')) : undefined;
+
+    // Update fields
+    const catId = parseObjectId(categoryId || categoryID);
+    if (catId) {
+      post.categoryID = catId;
+      post.categoryId = catId;
+    }
+    if (title !== undefined) post.title = title;
+    if (address !== undefined) post.address = address;
+    if (province !== undefined) post.province = province;
+    if (district !== undefined) post.district = district;
+    if (ward !== undefined) post.ward = ward;
+    if (exactAddress !== undefined) post.exactAddress = exactAddress;
+    if (cleanPrice !== undefined) post.price = cleanPrice;
+    if (area !== undefined) post.area = Number(area);
+    if (contactName !== undefined) post.contactName = contactName;
+    if (contactPhone !== undefined) post.contactPhone = contactPhone;
+    if (description !== undefined) post.description = description;
+    if (mergedImages.length > 0 || (existingImages.length === 0 && textImageUrls.length === 0 && fileUrls.length === 0)) {
+      post.images = mergedImages;
+    }
+    if (utilityArray.length > 0) post.utilities = utilityArray;
+
+    // VIP upgrade handling
+    const VIP_PRICE = 20000;
+    const previousPostType = post.postType;
+    const newPostType = postType || previousPostType;
+
+    if (previousPostType !== 'Tin VIP' && newPostType === 'Tin VIP' && userRole !== 'Admin') {
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Không tìm thấy thông tin người dùng.'
+        });
+      }
+      if (user.balance < VIP_PRICE) {
+        return res.status(400).json({
+          success: false,
+          message: 'Số dư không đủ để nâng cấp lên Tin VIP.'
+        });
+      }
+      await Promise.all([
+        User.findByIdAndUpdate(userId, { $inc: { balance: -VIP_PRICE } }),
+        Transaction.create({
+          userId: userId,
+          amount: VIP_PRICE,
+          transactionType: 'Payment',
+          status: 'Success',
+          description: 'Thanh toán nâng cấp tin VIP (chỉnh sửa)'
+        })
+      ]);
+    }
+    post.postType = newPostType;
+
+    // Non-admin edits reset status to Pending
+    if (userRole !== 'Admin') {
+      post.status = 'Pending';
+      post.rejectionReason = '';
+    }
+
+    const updatedPost = await post.save();
+
+    // Socket notification for admin
+    if (userRole !== 'Admin') {
+      const io = req.app.get('socketio');
+      if (io) {
+        const user = await User.findById(userId);
+        const userName = user ? user.fullName : 'Thành viên';
+        const rawTitle = title || post.title || '';
+        const shortTitle = rawTitle.length > 35 ? `${rawTitle.substring(0, 35)}...` : rawTitle;
+        io.emit('admin_notification', {
+          type: 'POST',
+          message: `User ${userName} vừa chỉnh sửa phòng: ${shortTitle} chờ duyệt lại.`,
+          countType: 'pendingPosts'
+        });
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Cập nhật tin đăng thành công.',
+      data: updatedPost
+    });
+  } catch (error) {
+    console.error('Error in updatePost controller:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Đã xảy ra lỗi khi cập nhật tin đăng.'
     });
   }
 };

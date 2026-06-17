@@ -11,4 +11,10 @@ router.get('/overview', statisticController.getOverviewStats);
 router.get('/posts-by-province', statisticController.getPostsByProvince);
 router.get('/revenue-by-month', statisticController.getRevenueByMonth);
 
+// Các API thống kê nâng cấp mới
+router.get('/posts-by-time', statisticController.getPostsByTime);
+router.get('/posts-by-region', statisticController.getPostsByRegion);
+router.get('/revenue', statisticController.getRevenue);
+router.get('/export', statisticController.exportReport);
+
 module.exports = router;

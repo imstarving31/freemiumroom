@@ -3,18 +3,19 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import socket from '../utils/socket';
-import { 
-  LayoutDashboard, 
-  CheckSquare, 
+import {
+  LayoutDashboard,
+  CheckSquare,
   Folder,
   Users,
-  CreditCard, 
-  Settings, 
-  LogOut, 
-  Bell, 
+  CreditCard,
+  Settings,
+  LogOut,
+  Bell,
   Search,
   User,
-  ChevronDown
+  ChevronDown,
+  MessageSquare
 } from 'lucide-react';
 import './AdminLayout.css';
 
@@ -103,7 +104,7 @@ export default function AdminLayout() {
   const menuItems = [
     {
       path: '/admin/dashboard',
-      label: 'Tổng quan',
+      label: 'Thống kê & Báo cáo',
       icon: <LayoutDashboard size={18} />
     },
     {
@@ -127,18 +128,18 @@ export default function AdminLayout() {
       icon: <CreditCard size={18} />
     },
     {
-      path: '#',
-      label: 'Hệ thống',
-      icon: <Settings size={18} />
+      path: '/admin/chatbot',
+      label: 'Quản lý Chatbot AI',
+      icon: <MessageSquare size={18} />
     }
   ];
 
   return (
     <div className="admin-layout-wrapper">
-      
+
       {/* Left Sidebar */}
       <aside className="admin-sidebar">
-        
+
         {/* Brand/Logo */}
         <div className="admin-brand">
           <Link to="/" className="brand-logo-text">
@@ -148,10 +149,10 @@ export default function AdminLayout() {
 
         {/* Admin Info Profile Summary */}
         <div className="sidebar-profile">
-          <img 
-            src={currentUser?.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'} 
-            alt={currentUser?.fullName} 
-            className="sidebar-avatar" 
+          <img
+            src={currentUser?.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}
+            alt={currentUser?.fullName}
+            className="sidebar-avatar"
             onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; }}
           />
           <div className="sidebar-profile-text">
@@ -167,8 +168,8 @@ export default function AdminLayout() {
               const isActive = location.pathname === item.path;
               return (
                 <li key={idx} className="menu-item-wrapper">
-                  <Link 
-                    to={item.path} 
+                  <Link
+                    to={item.path}
                     className={`menu-link-btn ${isActive ? 'active' : ''}`}
                   >
                     <span className="link-icon">{item.icon}</span>
@@ -182,8 +183,8 @@ export default function AdminLayout() {
 
         {/* Logout Button */}
         <div className="sidebar-footer">
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="sidebar-logout-btn"
             onClick={handleLogout}
           >
@@ -195,7 +196,7 @@ export default function AdminLayout() {
 
       {/* Right Main Area */}
       <div className="admin-main-area">
-        
+
         {/* Topbar */}
         <header className="admin-topbar">
           {/* Left search placeholder (hidden search box per layout design requirements) */}
@@ -203,12 +204,12 @@ export default function AdminLayout() {
 
           {/* Right actions */}
           <div className="topbar-actions">
-            
+
             {/* Notification bell */}
             <div className="topbar-bell-wrapper">
-              <button 
+              <button
                 type="button"
-                className="topbar-bell-btn" 
+                className="topbar-bell-btn"
                 title="Thông báo"
                 onClick={() => {
                   setShowNotifications(!showNotifications);
@@ -227,9 +228,9 @@ export default function AdminLayout() {
                   <div className="dropdown-header">
                     <h4>Thông báo hệ thống</h4>
                     {notifications.length > 0 && (
-                      <button 
+                      <button
                         type="button"
-                        className="clear-btn" 
+                        className="clear-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           setNotifications([]);
@@ -250,10 +251,10 @@ export default function AdminLayout() {
                         } else if (notif.type === 'PAYMENT' || notif.type === 'giao-dich') {
                           targetPath = '/admin/transactions';
                         }
-                        
+
                         return (
-                          <div 
-                            key={notif.id} 
+                          <div
+                            key={notif.id}
                             className="notification-item"
                             onClick={() => {
                               setShowNotifications(false);
@@ -280,7 +281,7 @@ export default function AdminLayout() {
 
             {/* Profile pill */}
             <div className="topbar-profile-wrapper">
-              <button 
+              <button
                 type="button"
                 className="topbar-profile-pill"
                 onClick={() => {
@@ -288,10 +289,10 @@ export default function AdminLayout() {
                   setShowNotifications(false);
                 }}
               >
-                <img 
-                  src={currentUser?.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'} 
-                  alt={currentUser?.fullName} 
-                  className="topbar-avatar" 
+                <img
+                  src={currentUser?.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}
+                  alt={currentUser?.fullName}
+                  className="topbar-avatar"
                   onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; }}
                 />
                 <span className="topbar-username">{currentUser?.fullName || 'Admin'}</span>
@@ -305,8 +306,8 @@ export default function AdminLayout() {
                     <span className="user-email">{currentUser?.email || 'admin@freemiumroom.com'}</span>
                   </div>
                   <hr className="dropdown-divider" />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="profile-dropdown-item"
                     onClick={() => {
                       setShowProfileMenu(false);
@@ -316,8 +317,8 @@ export default function AdminLayout() {
                     <Settings size={15} />
                     <span>Cài đặt tài khoản</span>
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="profile-dropdown-item logout-item"
                     onClick={handleLogout}
                   >

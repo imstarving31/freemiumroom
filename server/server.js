@@ -15,6 +15,8 @@ const userRoutes = require('./src/routes/user.route');
 const paymentRoutes = require('./src/routes/payment.route');
 const adminRoutes = require('./src/routes/admin.route');
 const statisticRoutes = require('./src/routes/statistic.route');
+const chatbotRoutes = require('./src/routes/chatbot.route');
+const chatbotAdminRoutes = require('./src/routes/chatbot.admin.route');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -34,6 +36,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/statistics', statisticRoutes);
+app.use('/api/stats', statisticRoutes);
+app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/admin/chatbot', chatbotAdminRoutes);
 
 
 // Root route

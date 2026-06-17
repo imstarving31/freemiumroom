@@ -2,22 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { 
-  Wifi, 
-  Wind, 
-  WashingMachine, 
-  Tv, 
-  Flame, 
-  Car, 
-  Key, 
-  Triangle, 
-  ShowerHead, 
-  Shirt, 
+import {
+  Wifi,
+  Wind,
+  WashingMachine,
+  Tv,
+  Flame,
+  Car,
+  Key,
+  Triangle,
+  ShowerHead,
+  Shirt,
   Home as HomeIcon,
-  MapPin, 
-  Star, 
-  Share2, 
-  Heart, 
+  MapPin,
+  Star,
+  Share2,
+  Heart,
   ShieldCheck,
   ChevronRight,
   PhoneCall,
@@ -45,6 +45,28 @@ export default function RoomDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showFullDesc, setShowFullDesc] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const [copied, setCopied] = useState(false);
+
+  const openLightbox = (index) => {
+    setPhotoIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const handleShareClick = () => {
+    const detailUrl = window.location.href;
+    navigator.clipboard.writeText(detailUrl)
+      .then(() => {
+        setCopied(true);
+        toast.success('Đã sao chép đường dẫn bài đăng vào bộ nhớ tạm!');
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err) => {
+        console.error('Failed to copy text: ', err);
+        toast.error('Không thể sao chép liên kết.');
+      });
+  };
 
   const { currentUser, token, updateUser } = useAuth();
   const navigate = useNavigate();
@@ -176,14 +198,8 @@ export default function RoomDetail() {
 
   // Safe image array parsing
   const images = room.images && room.images.length > 0 ? room.images : [
-    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=600&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=600&auto=format&fit=crop'
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=1200&auto=format&fit=crop'
   ];
-  
-  const mainImage = images[0];
-  const subImage1 = images[1] || images[0];
-  const subImage2 = images[2] || images[0];
 
   const ratingMock = 4.92;
   const reviewsMockCount = 120;
@@ -196,12 +212,12 @@ export default function RoomDetail() {
   return (
     <div className="room-detail-page">
       <div className="room-detail-container">
-        
+
         {/* 1. Header Title Block */}
         <div className="room-title-block">
           {room.postType === 'Tin VIP' && (
             <div style={{ marginBottom: '8px' }}>
-              <span 
+              <span
                 style={{
                   backgroundColor: '#ef4444',
                   color: '#fde047',
@@ -226,13 +242,16 @@ export default function RoomDetail() {
                 {room.address}
               </span>
             </div>
-            
+
             <div className="meta-right">
-              <button className="meta-action-btn">
-                <Share2 size={14} />
-                <span>Chia sẻ</span>
-              </button>
               <button 
+                className={`meta-action-btn ${copied ? 'copied' : ''}`}
+                onClick={handleShareClick}
+              >
+                <Share2 size={14} />
+                <span>{copied ? 'Đã copy link!' : 'Chia sẻ'}</span>
+              </button>
+              <button
                 className={`meta-action-btn ${isSaved ? 'saved' : ''}`}
                 onClick={handleFavoriteClick}
               >
@@ -244,36 +263,72 @@ export default function RoomDetail() {
         </div>
 
         {/* 2. Image Gallery Grid */}
-        <div className="room-gallery-grid">
-          <div className="gallery-main-col">
-            <img src={mainImage} alt="Room Preview Main" className="img-gallery-main" onError={(e) => {
-              e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
-            }} />
+        {images.length === 1 ? (
+          <div className="room-gallery-grid single-image">
+            <div className="gallery-main-col" style={{ cursor: 'pointer' }} onClick={() => openLightbox(0)}>
+              <img src={images[0]} alt="Room Preview" className="img-gallery-main" onError={(e) => {
+                e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
+              }} />
+            </div>
+            <button className="show-all-photos-btn" onClick={() => openLightbox(0)}>
+              <span>Hiển thị tất cả {images.length} ảnh</span>
+            </button>
           </div>
-          <div className="gallery-side-col">
-            <img src={subImage1} alt="Room Preview Sub 1" className="img-gallery-side" onError={(e) => {
-              e.target.src = 'https://placehold.co/600x400?text=Hình+ảnh+phòng+trọ';
-            }} />
-            <img src={subImage2} alt="Room Preview Sub 2" className="img-gallery-side" onError={(e) => {
-              e.target.src = 'https://placehold.co/600x400?text=Hình+ảnh+phòng+trọ';
-            }} />
+        ) : images.length === 2 ? (
+          <div className="room-gallery-grid two-images">
+            <div className="gallery-main-col" style={{ cursor: 'pointer' }} onClick={() => openLightbox(0)}>
+              <img src={images[0]} alt="Room Preview 1" className="img-gallery-main" onError={(e) => {
+                e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
+              }} />
+            </div>
+            <div className="gallery-main-col" style={{ cursor: 'pointer' }} onClick={() => openLightbox(1)}>
+              <img src={images[1]} alt="Room Preview 2" className="img-gallery-main" onError={(e) => {
+                e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
+              }} />
+            </div>
+            <button className="show-all-photos-btn" onClick={() => openLightbox(0)}>
+              <span>Hiển thị tất cả {images.length} ảnh</span>
+            </button>
           </div>
-          <button className="show-all-photos-btn">
-            <span>Hiển thị tất cả {images.length} ảnh</span>
-          </button>
-        </div>
+        ) : (
+          <div className="room-gallery-grid">
+            <div className="gallery-main-col" style={{ cursor: 'pointer' }} onClick={() => openLightbox(0)}>
+              <img src={images[0]} alt="Room Preview Main" className="img-gallery-main" onError={(e) => {
+                e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
+              }} />
+            </div>
+            <div className="gallery-side-col">
+              <img src={images[1]} alt="Room Preview Sub 1" className="img-gallery-side" style={{ cursor: 'pointer' }} onClick={() => openLightbox(1)} onError={(e) => {
+                e.target.src = 'https://placehold.co/600x400?text=Hình+ảnh+phòng+trọ';
+              }} />
+              <div className="sub-image-wrapper" style={{ cursor: 'pointer' }} onClick={() => openLightbox(2)}>
+                <img src={images[2]} alt="Room Preview Sub 2" className="img-gallery-side" onError={(e) => {
+                  e.target.src = 'https://placehold.co/600x400?text=Hình+ảnh+phòng+trọ';
+                }} />
+                {images.length > 3 && (
+                  <div className="gallery-overlay">
+                    <span>+{images.length - 3}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <button className="show-all-photos-btn" onClick={() => openLightbox(0)}>
+              <span>Hiển thị tất cả {images.length} ảnh</span>
+            </button>
+          </div>
+        )}
 
         {/* 3. Main Content Split Layout */}
         <div className="room-content-split">
-          
+
           {/* Left Column: Details */}
           <div className="content-left-col">
-            
+
             {/* Owner Section */}
             <div className="room-owner-summary">
               <div className="owner-text">
                 <h2>{room.categoryId?.categoryName || room.categoryID?.categoryName || 'Phòng cho thuê'} bởi {hostName}</h2>
-                <p>Diện tích: {room.area} m² • Trạng thái: {room.status || 'Đang hiển thị'}</p>
+                <p>Diện tích: {room.area} m²</p>
               </div>
               <img src={hostAvatar} alt={hostName} className="owner-avatar-img" onError={(e) => {
                 e.target.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150&auto=format&fit=crop';
@@ -311,8 +366,8 @@ export default function RoomDetail() {
                 </p>
               </div>
               {room.description && room.description.length > 200 && (
-                <button 
-                  className="read-more-desc-btn" 
+                <button
+                  className="read-more-desc-btn"
                   onClick={() => setShowFullDesc(!showFullDesc)}
                 >
                   {showFullDesc ? 'Ẩn bớt' : 'Xem thêm'}
@@ -342,7 +397,7 @@ export default function RoomDetail() {
           {/* Right Column: Sticky Pricing Sidebar */}
           <div className="content-right-col">
             <div className="sticky-sidebar-card">
-              
+
               {/* Card Header Price */}
               <div className="sidebar-card-header">
                 <div className="sidebar-price">
@@ -368,8 +423,8 @@ export default function RoomDetail() {
                   <PhoneCall size={16} />
                   <span>Gọi {hostPhone}</span>
                 </a>
-                
-                <button 
+
+                <button
                   className={`save-post-sidebar-btn ${isSaved ? 'active' : ''}`}
                   onClick={handleFavoriteClick}
                 >
@@ -380,29 +435,13 @@ export default function RoomDetail() {
 
               <p className="sidebar-muted-tip">Bảo mật thông tin thanh toán & an toàn giao dịch</p>
 
-              {/* Pricing breakdown table */}
-              <div className="pricing-breakdown-table">
-                <div className="table-row">
-                  <span className="row-label">Phí dịch vụ</span>
-                  <span className="row-value">0đ</span>
-                </div>
-                <div className="table-row">
-                  <span className="row-label">Đặt cọc</span>
-                  <span className="row-value">1 tháng</span>
-                </div>
-                <div className="table-row total-row">
-                  <span className="row-label">Tổng cộng / tháng</span>
-                  <span className="row-value">{formatCurrency(room.price)}</span>
-                </div>
-              </div>
-
             </div>
 
             {/* Verification Under Sidebar */}
             <div className="sidebar-verification-card">
               <ShieldCheck size={20} className="shield-icon" />
               <p className="verify-text">
-                Chủ nhà đã xác minh. Hãy luôn liên hệ qua các kênh chính thức của Haven để bảo vệ quyền lợi của bạn.
+                Chủ nhà đã xác minh. Hãy luôn liên hệ qua các kênh chính thức của FreemiumRoom để bảo vệ quyền lợi của bạn.
               </p>
             </div>
 
@@ -411,6 +450,49 @@ export default function RoomDetail() {
         </div>
 
       </div>
+
+      {/* Lightbox Modal */}
+      {lightboxOpen && (
+        <div className="room-lightbox-overlay" onClick={() => setLightboxOpen(false)}>
+          <button className="lightbox-close-btn" onClick={() => setLightboxOpen(false)}>
+            &times;
+          </button>
+          
+          <button 
+            className="lightbox-arrow-btn prev" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setPhotoIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+            }}
+          >
+            &#8249;
+          </button>
+          
+          <div className="lightbox-image-container" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={images[photoIndex]} 
+              alt={`Room Photo ${photoIndex + 1}`} 
+              className="lightbox-main-img" 
+              onError={(e) => {
+                e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
+              }}
+            />
+            <div className="lightbox-counter">
+              Ảnh {photoIndex + 1} / {images.length}
+            </div>
+          </div>
+          
+          <button 
+            className="lightbox-arrow-btn next" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setPhotoIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+            }}
+          >
+            &#8250;
+          </button>
+        </div>
+      )}
     </div>
   );
 }

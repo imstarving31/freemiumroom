@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
-import * as XLSX from 'xlsx';
 import {
   Users,
   FileText,
@@ -9,15 +8,27 @@ import {
   DollarSign,
   Download,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  ChevronDown
 } from 'lucide-react';
 import './Dashboard.css';
 
 const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#14b8a6', '#f43f5e'];
 
-// Custom Bar Chart Component
+// Custom Bar Chart Component (Revenue)
 function CustomBarChart({ data }) {
-  const maxRevenue = Math.max(...data.map(d => d.revenue), 100000);
+  if (!data || data.length === 0 || data.reduce((sum, d) => sum + (d.revenue || 0), 0) === 0) {
+    return (
+      <div className="chart-empty-state">
+        <div className="empty-state-content">
+          <AlertCircle size={24} className="text-gray" />
+          <p>Không có dữ liệu doanh thu trong khoảng thời gian này</p>
+        </div>
+      </div>
+    );
+  }
+
+  const maxRevenue = Math.max(...data.map(d => d.revenue || 0), 100000);
 
   return (
     <div className="custom-bar-chart-wrapper">
@@ -34,7 +45,7 @@ function CustomBarChart({ data }) {
       
       <div className="chart-bars-area">
         {data.map((item, index) => {
-          const heightPercent = (item.revenue / maxRevenue) * 100;
+          const heightPercent = ((item.revenue || 0) / maxRevenue) * 100;
           return (
             <div key={index} className="chart-bar-column">
               <div className="bar-container">
@@ -43,14 +54,65 @@ function CustomBarChart({ data }) {
                   style={{ height: `${heightPercent || 1}%` }}
                 >
                   <div className="bar-tooltip">
-                    <span className="tooltip-month">{item.month}</span>
+                    <span className="tooltip-month">{item.time}</span>
                     <span className="tooltip-value">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.revenue)}
+                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.revenue || 0)}
                     </span>
                   </div>
                 </div>
               </div>
-              <span className="bar-label">{item.month.replace('Tháng ', 'T')}</span>
+              <span className="bar-label">{item.time.split(' (')[0]}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Custom Post Time Chart Component (Room Posts Count)
+function CustomPostTimeChart({ data }) {
+  if (!data || data.length === 0 || data.reduce((sum, d) => sum + (d.count || 0), 0) === 0) {
+    return (
+      <div className="chart-empty-state">
+        <div className="empty-state-content">
+          <AlertCircle size={24} className="text-gray" />
+          <p>Không có dữ liệu bài đăng trong khoảng thời gian này</p>
+        </div>
+      </div>
+    );
+  }
+
+  const maxCount = Math.max(...data.map(d => d.count || 0), 5);
+
+  return (
+    <div className="custom-bar-chart-wrapper posts-time-chart">
+      <div className="chart-y-axis-labels">
+        {[4, 3, 2, 1, 0].map(i => {
+          const val = Math.round((maxCount / 4) * i);
+          return (
+            <span key={i}>{val}</span>
+          );
+        })}
+      </div>
+      
+      <div className="chart-bars-area">
+        {data.map((item, index) => {
+          const heightPercent = ((item.count || 0) / maxCount) * 100;
+          return (
+            <div key={index} className="chart-bar-column">
+              <div className="bar-container">
+                <div 
+                  className="bar-fill posts-bar-fill" 
+                  style={{ height: `${heightPercent || 1}%` }}
+                >
+                  <div className="bar-tooltip">
+                    <span className="tooltip-month">{item.time}</span>
+                    <span className="tooltip-value">{item.count} bài đăng</span>
+                  </div>
+                </div>
+              </div>
+              <span className="bar-label">{item.time.split(' (')[0]}</span>
             </div>
           );
         })}
@@ -67,10 +129,13 @@ function CustomDonutChart({ data }) {
 
   const [hoveredSlice, setHoveredSlice] = useState(null);
 
-  if (total === 0) {
+  if (total === 0 || !data || data.length === 0) {
     return (
       <div className="chart-empty-state">
-        <p>Không có dữ liệu khu vực</p>
+        <div className="empty-state-content">
+          <AlertCircle size={24} className="text-gray" />
+          <p>Không có dữ liệu khu vực trong khoảng thời gian này</p>
+        </div>
       </div>
     );
   }
@@ -150,55 +215,90 @@ function CustomDonutChart({ data }) {
   );
 }
 
+
 export default function Dashboard() {
   const { token } = useAuth();
+  const [timeRange, setTimeRange] = useState('month');
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // States for statistics
+  
+  // Data states
   const [overview, setOverview] = useState({
     totalUsers: 0,
     totalRoomPosts: 0,
     pendingRoomPosts: 0,
     totalRevenue: 0
   });
-  const [provinceData, setProvinceData] = useState([]);
+  const [postsTimeData, setPostsTimeData] = useState([]);
+  const [postsRegionData, setPostsRegionData] = useState([]);
   const [revenueData, setRevenueData] = useState([]);
+  
+  // UI states
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const exportDropdownRef = useRef(null);
 
+  // Click outside handler for export dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target)) {
+        setShowExportDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Fetch all dashboard data dynamically based on timeRange
   const fetchData = async () => {
+    if (!token) return;
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch all stats concurrently
-      const [overviewRes, provinceRes, revenueRes] = await Promise.all([
-        fetch('http://localhost:5000/api/statistics/overview', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch('http://localhost:5000/api/statistics/posts-by-province', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch('http://localhost:5000/api/statistics/revenue-by-month', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-      ]);
+      const headers = {
+        'Authorization': `Bearer ${token}`
+      };
 
-      if (!overviewRes.ok || !provinceRes.ok || !revenueRes.ok) {
-        throw new Error('Không thể lấy đầy đủ dữ liệu thống kê từ máy chủ.');
+      let queryParams = `timeRange=${timeRange}`;
+      if (timeRange === 'custom') {
+        queryParams += `&startDate=${startDate}&endDate=${endDate}`;
       }
 
-      const overviewResult = await overviewRes.json();
-      const provinceResult = await provinceRes.json();
-      const revenueResult = await revenueRes.json();
+      const [overviewRes, postsTimeRes, postsRegionRes, revenueRes] = await Promise.all([
+        fetch(`http://localhost:5000/api/stats/overview?${queryParams}`, { headers }),
+        fetch(`http://localhost:5000/api/stats/posts-by-time?${queryParams}`, { headers }),
+        fetch(`http://localhost:5000/api/stats/posts-by-region?${queryParams}`, { headers }),
+        fetch(`http://localhost:5000/api/stats/revenue?${queryParams}`, { headers })
+      ]);
 
-      if (overviewResult.success) setOverview(overviewResult.data);
-      if (provinceResult.success) setProvinceData(provinceResult.data);
-      if (revenueResult.success) setRevenueData(revenueResult.data);
+      if (!overviewRes.ok || !postsTimeRes.ok || !postsRegionRes.ok || !revenueRes.ok) {
+        throw new Error('Không thể tải một hoặc nhiều nguồn dữ liệu thống kê.');
+      }
+
+      const [overviewData, postsTimeJson, postsRegionJson, revenueJson] = await Promise.all([
+        overviewRes.json(),
+        postsTimeRes.json(),
+        postsRegionRes.json(),
+        revenueRes.json()
+      ]);
+
+      if (overviewData.success) setOverview(overviewData.data);
+      if (postsTimeJson.success) setPostsTimeData(postsTimeJson.data || []);
+      if (postsRegionJson.success) setPostsRegionData(postsRegionJson.data || []);
+      if (revenueJson.success) setRevenueData(revenueJson.data || []);
 
     } catch (err) {
-      console.error('Lỗi khi tải dữ liệu thống kê:', err);
-      setError(err.message || 'Lỗi kết nối máy chủ khi tải số liệu thống kê.');
-      toast.error('Lỗi kết nối máy chủ khi tải số liệu thống kê.');
+      console.error('Error fetching dashboard statistics:', err);
+      setError(err.message || 'Lỗi kết nối đến máy chủ.');
+      toast.error(err.message || 'Lỗi khi tải dữ liệu thống kê.');
     } finally {
       setLoading(false);
     }
@@ -206,75 +306,90 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [timeRange, startDate, endDate, token]);
 
-  // Format currency VNĐ
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value || 0);
-  };
-
-  // Export report handler (Excel mockup)
-  const handleExportExcel = () => {
+  // Handle report export (excel or csv)
+  const handleExport = async (format) => {
+    if (!token) return;
     try {
-      const wb = XLSX.utils.book_new();
+      toast.info(`Đang tạo báo cáo dạng ${format.toUpperCase()}...`, { autoClose: 2000 });
+      setShowExportDropdown(false);
 
-      // Sheet 1: Tổng quan
-      const overviewData = [
-        { 'Chỉ số': 'Tổng thành viên', 'Giá trị': overview.totalUsers },
-        { 'Chỉ số': 'Tổng tin đăng', 'Giá trị': overview.totalRoomPosts },
-        { 'Chỉ số': 'Bài đang chờ duyệt', 'Giá trị': overview.pendingRoomPosts },
-        { 'Chỉ số': 'Tổng doanh thu (VNĐ)', 'Giá trị': overview.totalRevenue }
-      ];
-      const wsOverview = XLSX.utils.json_to_sheet(overviewData);
-      XLSX.utils.book_append_sheet(wb, wsOverview, 'Tổng quan');
+      let queryParams = `timeRange=${timeRange}`;
+      if (timeRange === 'custom') {
+        queryParams += `&startDate=${startDate}&endDate=${endDate}`;
+      }
 
-      // Sheet 2: Doanh thu theo tháng
-      const monthlyRevenueData = (revenueData || []).map(item => ({
-        'Tháng': item.month,
-        'Doanh thu (VNĐ)': item.revenue
-      }));
-      const wsRevenue = XLSX.utils.json_to_sheet(monthlyRevenueData);
-      XLSX.utils.book_append_sheet(wb, wsRevenue, 'Doanh thu theo tháng');
+      const response = await fetch(`http://localhost:5000/api/stats/export?${queryParams}&format=${format}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-      // Sheet 3: Phân bổ khu vực
-      const areaData = (provinceData || []).map(entry => ({
-        'Tỉnh/Thành phố': entry.name,
-        'Số lượng phòng': entry.value
-      }));
-      const wsArea = XLSX.utils.json_to_sheet(areaData);
-      XLSX.utils.book_append_sheet(wb, wsArea, 'Phân bổ khu vực');
+      if (!response.ok) {
+        const text = await response.text();
+        let errorMsg = 'Xuất báo cáo thất bại.';
+        try {
+          const json = JSON.parse(text);
+          errorMsg = json.message || errorMsg;
+        } catch (e) {
+          errorMsg = text || errorMsg;
+        }
+        throw new Error(errorMsg);
+      }
 
-      // Write file with date suffix
-      const today = new Date();
-      const day = today.getDate().toString().padStart(2, '0');
-      const month = (today.getMonth() + 1).toString().padStart(2, '0');
-      const year = today.getFullYear();
-      const fileName = `Bao_Cao_Thong_Ke_Hethong_${day}_${month}_${year}.xlsx`;
-
-      XLSX.writeFile(wb, fileName);
-      toast.success('Xuất báo cáo Excel thành công!');
-    } catch (error) {
-      console.error('Error exporting Excel:', error);
-      toast.error('Lỗi khi xuất báo cáo Excel: ' + (error.message || 'Lỗi không xác định'));
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      
+      const fileExt = format === 'csv' ? 'csv' : 'xlsx';
+      let timeLabel = timeRange;
+      if (timeRange === 'custom') {
+        timeLabel = `${startDate}_to_${endDate}`;
+      } else {
+        timeLabel = timeRange === 'day' ? 'hom_nay' : timeRange === 'week' ? 'tuan_nay' : timeRange === 'month' ? 'thang_nay' : 'nam_nay';
+      }
+      link.download = `bao_cao_thong_ke_${timeLabel}.${fileExt}`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      toast.success('Tải xuống báo cáo thành công!');
+    } catch (err) {
+      console.error('Error exporting report:', err);
+      toast.error(err.message || 'Đã xảy ra lỗi khi xuất báo cáo.');
     }
   };
 
-  if (loading) {
+  if (loading && !overview.totalUsers) {
     return (
-      <div className="dashboard-loading-box">
-        <Loader2 size={48} className="spin-icon text-blue" />
-        <p className="loading-text">Đang tổng hợp dữ liệu hệ thống...</p>
+      <div className="admin-dashboard-page">
+        <div className="dashboard-container">
+          <div className="dashboard-loading-box">
+            <Loader2 className="spin-icon text-blue" size={40} />
+            <p className="loading-text">Đang tải dữ liệu thống kê...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error && !overview.totalUsers) {
     return (
-      <div className="dashboard-error-box">
-        <AlertCircle size={48} className="text-red" />
-        <h3>Đã xảy ra lỗi</h3>
-        <p>{error}</p>
-        <button type="button" className="btn-retry" onClick={fetchData}>Thử lại</button>
+      <div className="admin-dashboard-page">
+        <div className="dashboard-container">
+          <div className="dashboard-error-box">
+            <AlertCircle size={40} className="text-red" />
+            <h3>Đã xảy ra lỗi</h3>
+            <p>{error}</p>
+            <button className="btn-retry" onClick={fetchData}>
+              Thử lại
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -283,92 +398,199 @@ export default function Dashboard() {
     <div className="admin-dashboard-page">
       <div className="dashboard-container">
         
-        {/* Header row */}
-        <div className="dashboard-header-row">
-          <div>
-            <h1 className="dashboard-title">Tổng quan hệ thống</h1>
-            <p className="dashboard-subtitle">Số liệu phân tích, tin đăng và doanh thu của FreemiumRoom</p>
+        {/* Topbar: Title Area */}
+        <div className="dashboard-title-area">
+          <h1 className="dashboard-title">Thống kê & Báo cáo</h1>
+          <p className="dashboard-subtitle">Theo dõi hoạt động, tin đăng và doanh thu hệ thống</p>
+        </div>
+        
+        {/* Controls Row below title: Tabs, Date Range, and Export Button */}
+        <div className="dashboard-controls-row">
+          <div className="stats-time-tabs">
+            <button 
+              type="button"
+              className={`time-tab-btn ${timeRange === 'day' ? 'active' : ''}`}
+              onClick={() => setTimeRange('day')}
+            >
+              Hôm nay
+            </button>
+            <button 
+              type="button"
+              className={`time-tab-btn ${timeRange === 'week' ? 'active' : ''}`}
+              onClick={() => setTimeRange('week')}
+            >
+              Tuần này
+            </button>
+            <button 
+              type="button"
+              className={`time-tab-btn ${timeRange === 'month' ? 'active' : ''}`}
+              onClick={() => setTimeRange('month')}
+            >
+              Tháng này
+            </button>
+            <button 
+              type="button"
+              className={`time-tab-btn ${timeRange === 'year' ? 'active' : ''}`}
+              onClick={() => setTimeRange('year')}
+            >
+              Năm nay
+            </button>
+            <button 
+              type="button"
+              className={`time-tab-btn ${timeRange === 'custom' ? 'active' : ''}`}
+              onClick={() => setTimeRange('custom')}
+            >
+              Tùy chọn ngày
+            </button>
           </div>
-          <button 
-            type="button" 
-            className="btn-export-excel"
-            onClick={handleExportExcel}
-          >
-            <Download size={16} />
-            <span>Xuất báo cáo (Excel)</span>
-          </button>
+
+          {/* Custom date range selection - only visible when timeRange is 'custom' */}
+          {timeRange === 'custom' && (
+            <div className="dashboard-custom-range-inline animate-fade-in">
+              <div className="custom-date-inputs">
+                <div className="date-input-group">
+                  <label>Từ</label>
+                  <input 
+                    type="date" 
+                    value={startDate} 
+                    onChange={(e) => setStartDate(e.target.value)} 
+                    max={endDate}
+                  />
+                </div>
+                <div className="date-input-divider">|</div>
+                <div className="date-input-group">
+                  <label>Đến</label>
+                  <input 
+                    type="date" 
+                    value={endDate} 
+                    onChange={(e) => setEndDate(e.target.value)} 
+                    min={startDate}
+                    max={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="export-dropdown-wrapper" ref={exportDropdownRef}>
+            <button 
+              className="btn-export-excel" 
+              onClick={() => setShowExportDropdown(!showExportDropdown)}
+            >
+              <Download size={16} />
+              <span>Xuất báo cáo</span>
+              <ChevronDown size={14} />
+            </button>
+            {showExportDropdown && (
+              <div className="export-dropdown-menu">
+                <button onClick={() => handleExport('excel')}>
+                  Xuất file Excel (.xlsx)
+                </button>
+                <button onClick={() => handleExport('csv')}>
+                  Xuất file CSV (.csv)
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Cards Grid */}
+        {/* Overview Stats Cards */}
         <div className="dashboard-cards-grid">
-          
           <div className="dashboard-card">
-            <div className="card-icon-box bg-blue text-blue">
-              <Users size={24} />
+            <div className="card-icon-box bg-blue">
+              <Users className="text-blue" size={24} />
             </div>
             <div className="card-info">
-              <span className="card-value">{overview.totalUsers}</span>
-              <span className="card-label">Tổng thành viên</span>
+              <span className="card-value">{overview.totalUsers.toLocaleString('vi-VN')}</span>
+              <span className="card-label">Thành viên mới</span>
             </div>
           </div>
 
           <div className="dashboard-card">
-            <div className="card-icon-box bg-green text-green">
-              <FileText size={24} />
+            <div className="card-icon-box bg-green">
+              <FileText className="text-green" size={24} />
             </div>
             <div className="card-info">
-              <span className="card-value">{overview.totalRoomPosts}</span>
-              <span className="card-label">Tổng tin đăng</span>
+              <span className="card-value">{overview.totalRoomPosts.toLocaleString('vi-VN')}</span>
+              <span className="card-label">Tin đăng mới</span>
             </div>
           </div>
 
           <div className="dashboard-card">
-            <div className="card-icon-box bg-yellow text-yellow">
-              <Clock size={24} />
+            <div className="card-icon-box bg-yellow">
+              <Clock className="text-yellow" size={24} />
             </div>
             <div className="card-info">
-              <span className="card-value">{overview.pendingRoomPosts}</span>
-              <span className="card-label">Tin chờ duyệt</span>
+              <span className="card-value">{overview.pendingRoomPosts.toLocaleString('vi-VN')}</span>
+              <span className="card-label">Bài chờ duyệt</span>
             </div>
           </div>
 
           <div className="dashboard-card">
-            <div className="card-icon-box bg-purple text-purple">
-              <DollarSign size={24} />
+            <div className="card-icon-box bg-purple">
+              <DollarSign className="text-purple" size={24} />
             </div>
             <div className="card-info">
-              <span className="card-value">{formatCurrency(overview.totalRevenue)}</span>
-              <span className="card-label">Tổng doanh thu</span>
+              <span className="card-value">
+                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(overview.totalRevenue || 0)}
+              </span>
+              <span className="card-label">Doanh thu phát sinh</span>
             </div>
           </div>
-
         </div>
 
         {/* Charts Grid */}
         <div className="dashboard-charts-grid">
-          
-          {/* Revenue Monthly Chart (Bar Chart) */}
+          {/* Post quantity over time chart */}
           <div className="chart-card col-span-2">
             <div className="chart-card-header">
-              <h3 className="chart-card-title">Doanh thu theo tháng</h3>
-              <span className="chart-card-subtitle">Số liệu doanh thu tin VIP năm {new Date().getFullYear()}</span>
+              <h3 className="chart-card-title">Số lượng tin đăng mới</h3>
+              <p className="chart-card-subtitle">Thống kê số lượng phòng trọ đăng tải theo thời gian</p>
             </div>
             <div className="chart-container">
-              <CustomBarChart data={revenueData} />
+              {loading ? (
+                <div className="chart-loading-overlay">
+                  <Loader2 className="spin-icon text-blue" size={24} />
+                </div>
+              ) : (
+                <CustomPostTimeChart data={postsTimeData} />
+              )}
             </div>
           </div>
 
-          {/* Room Posts By Province (Pie/Donut Chart) */}
+          {/* Region distribution donut chart */}
           <div className="chart-card">
             <div className="chart-card-header">
               <h3 className="chart-card-title">Tin đăng theo khu vực</h3>
-              <span className="chart-card-subtitle">Tỷ lệ phân bổ tin theo Tỉnh/Thành phố</span>
+              <p className="chart-card-subtitle">Tỷ lệ tin đăng giữa các tỉnh thành phố</p>
             </div>
             <div className="chart-container">
-              <CustomDonutChart data={provinceData} />
+              {loading ? (
+                <div className="chart-loading-overlay">
+                  <Loader2 className="spin-icon text-blue" size={24} />
+                </div>
+              ) : (
+                <CustomDonutChart data={postsRegionData} />
+              )}
             </div>
           </div>
 
+          {/* Revenue chart */}
+          <div className="chart-card col-span-2" style={{ gridColumn: 'span 3 / span 3' }}>
+            <div className="chart-card-header">
+              <h3 className="chart-card-title">Biểu đồ doanh thu dịch vụ</h3>
+              <p className="chart-card-subtitle">Chi tiết dòng doanh thu phát sinh từ thanh toán VIP</p>
+            </div>
+            <div className="chart-container">
+              {loading ? (
+                <div className="chart-loading-overlay">
+                  <Loader2 className="spin-icon text-blue" size={24} />
+                </div>
+              ) : (
+                <CustomBarChart data={revenueData} />
+              )}
+            </div>
+          </div>
         </div>
 
       </div>

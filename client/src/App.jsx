@@ -12,6 +12,7 @@ import FavoritePosts from './pages/FavoritePosts';
 import Wallet from './pages/Wallet';
 import ManagePosts from './pages/ManagePosts';
 import EditPost from './pages/EditPost';
+import AccountManager from './pages/AccountManager';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AdminLayout from './layouts/AdminLayout';
@@ -20,8 +21,10 @@ import ApprovePosts from './pages/Admin/ApprovePosts';
 import ManageCategories from './pages/Admin/ManageCategories';
 import ManageUsers from './pages/Admin/ManageUsers';
 import ManageTransactions from './pages/Admin/ManageTransactions';
+import ChatbotManager from './pages/Admin/ChatbotManager';
 import socket from './utils/socket';
 import { useAuth } from './context/AuthContext';
+import ChatbotBubble from './components/ChatbotBubble';
 import './App.css';
 
 function App() {
@@ -30,7 +33,7 @@ function App() {
 
   React.useEffect(() => {
     socket.connect();
-    
+
     socket.on('connect', () => {
       console.log('Socket connected:', socket.id);
     });
@@ -60,7 +63,7 @@ function App() {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
-          
+
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dang-tin" element={<PostRoom />} />
@@ -68,6 +71,7 @@ function App() {
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/manage-posts" element={<ManagePosts />} />
             <Route path="/edit-post/:id" element={<EditPost />} />
+            <Route path="/profile" element={<AccountManager />} />
           </Route>
 
           <Route path="/login" element={<Login />} />
@@ -84,9 +88,11 @@ function App() {
             <Route path="/admin/categories" element={<ManageCategories />} />
             <Route path="/admin/users" element={<ManageUsers />} />
             <Route path="/admin/transactions" element={<ManageTransactions />} />
+            <Route path="/admin/chatbot" element={<ChatbotManager />} />
           </Route>
         </Route>
       </Routes>
+      <ChatbotBubble />
       <ToastContainer position="top-right" autoClose={3000} theme="light" />
     </BrowserRouter>
   );
