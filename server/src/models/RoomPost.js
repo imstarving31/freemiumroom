@@ -12,11 +12,6 @@ const RoomPostSchema = new Schema({
     ref: 'Category',
     default: null
   },
-  categoryId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Category',
-    default: null
-  },
   title: {
     type: String,
     required: [true, 'Tiêu đề là bắt buộc']
@@ -26,9 +21,6 @@ const RoomPostSchema = new Schema({
     required: [true, 'Địa chỉ là bắt buộc']
   },
   province: {
-    type: String
-  },
-  district: {
     type: String
   },
   ward: {

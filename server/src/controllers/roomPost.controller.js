@@ -12,7 +12,6 @@ exports.createPost = async (req, res) => {
       title,
       address,
       province,
-      district,
       ward,
       exactAddress,
       price,
@@ -72,11 +71,9 @@ exports.createPost = async (req, res) => {
     const newPost = new RoomPost({
       userID: parseObjectId(userID),
       categoryID: parseObjectId(categoryId || categoryID),
-      categoryId: parseObjectId(categoryId || categoryID),
       title,
       address,
       province,
-      district,
       ward,
       exactAddress,
       price: cleanPrice,
@@ -113,7 +110,7 @@ exports.createPost = async (req, res) => {
       const results = await Promise.all([
         User.findByIdAndUpdate(userID, { $inc: { balance: -VIP_PRICE } }),
         Transaction.create({
-          userId: userID,
+          userID: userID,
           amount: VIP_PRICE,
           transactionType: 'Payment',
           status: 'Success',
@@ -162,7 +159,6 @@ exports.getAllPosts = async (req, res) => {
       maxPrice,
       minArea,
       maxArea,
-      district,
       utilities,
       postType,
       categoryId,
@@ -197,22 +193,14 @@ exports.getAllPosts = async (req, res) => {
       });
     }
 
-    // Category Filter (matches either categoryId or categoryID field)
+    // Category Filter
     if (categoryId) {
-      conditions.push({
-        $or: [
-          { categoryId: categoryId },
-          { categoryID: categoryId }
-        ]
-      });
+      conditions.push({ categoryID: categoryId });
     }
 
-    // Address Filters (province, district, ward)
+    // Address Filters (province, ward)
     if (province) {
       conditions.push({ address: { $regex: province, $options: 'i' } });
-    }
-    if (district) {
-      conditions.push({ address: { $regex: district, $options: 'i' } });
     }
     if (ward) {
       conditions.push({ address: { $regex: ward, $options: 'i' } });
@@ -264,7 +252,6 @@ exports.getAllPosts = async (req, res) => {
     let totalPages = limitNum ? Math.ceil(totalRooms / limitNum) : 1;
 
     let postsQuery = RoomPost.find(query)
-      .populate('categoryId', 'categoryName')
       .populate('categoryID', 'categoryName')
       .populate('userID', 'fullName avatar phoneNumber')
       .sort({ postType: 1, createdAt: -1 });
@@ -303,7 +290,6 @@ exports.getPostById = async (req, res) => {
 
     const post = await RoomPost.findById(id)
       .populate('userID', 'fullName avatar phoneNumber')
-      .populate('categoryId', 'categoryName')
       .populate('categoryID', 'categoryName');
     if (!post || post.isHostBlocked) {
       return res.status(404).json({
@@ -329,7 +315,6 @@ exports.getMyPosts = async (req, res) => {
   try {
     const userID = req.user.id;
     const posts = await RoomPost.find({ userID })
-      .populate('categoryId', 'categoryName')
       .populate('categoryID', 'categoryName')
       .sort({ createdAt: -1 });
 
@@ -467,7 +452,6 @@ exports.updatePost = async (req, res) => {
       title,
       address,
       province,
-      district,
       ward,
       exactAddress,
       price,
@@ -534,12 +518,10 @@ exports.updatePost = async (req, res) => {
     const catId = parseObjectId(categoryId || categoryID);
     if (catId) {
       post.categoryID = catId;
-      post.categoryId = catId;
     }
     if (title !== undefined) post.title = title;
     if (address !== undefined) post.address = address;
     if (province !== undefined) post.province = province;
-    if (district !== undefined) post.district = district;
     if (ward !== undefined) post.ward = ward;
     if (exactAddress !== undefined) post.exactAddress = exactAddress;
     if (cleanPrice !== undefined) post.price = cleanPrice;
@@ -574,7 +556,7 @@ exports.updatePost = async (req, res) => {
       await Promise.all([
         User.findByIdAndUpdate(userId, { $inc: { balance: -VIP_PRICE } }),
         Transaction.create({
-          userId: userId,
+          userID: userId,
           amount: VIP_PRICE,
           transactionType: 'Payment',
           status: 'Success',

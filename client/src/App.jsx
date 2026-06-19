@@ -46,7 +46,7 @@ function App() {
 
   React.useEffect(() => {
     socket.on('force-logout', (data) => {
-      if (data.userId === currentUserId) {
+      if (data.userID === currentUserId) {
         localStorage.clear();
         alert('Tài khoản của bạn đã bị quản trị viên khóa!');
         window.location.href = '/login';

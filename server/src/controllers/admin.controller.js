@@ -7,7 +7,6 @@ exports.getPendingPosts = async (req, res) => {
   try {
     const pendingPosts = await RoomPost.find({ status: 'Pending' })
       .populate('userID', 'fullName email')
-      .populate('categoryId', 'categoryName')
       .populate('categoryID', 'categoryName')
       .sort({ createdAt: -1 });
 
@@ -242,7 +241,7 @@ exports.toggleBlockUser = async (req, res) => {
     if (userToBlock.isBlocked) {
       const io = req.app.get('socketio');
       if (io) {
-        io.emit('force-logout', { userId: id });
+        io.emit('force-logout', { userID: id });
       }
     }
 
@@ -269,7 +268,7 @@ exports.toggleBlockUser = async (req, res) => {
 exports.getAllTransactions = async (req, res) => {
   try {
     const transactions = await Transaction.find()
-      .populate('userId', 'fullName email')
+      .populate('userID', 'fullName email')
       .sort({ createdAt: -1 });
 
     return res.status(200).json({

@@ -488,7 +488,7 @@ export default function ApprovePosts() {
                         <div>
                           <span className="spec-label">Danh mục</span>
                           <span className="spec-value">
-                            {selectedPost.categoryId?.categoryName || selectedPost.categoryID?.categoryName || 'Chưa phân loại'}
+                            {selectedPost.categoryID?.categoryName || 'Chưa phân loại'}
                           </span>
                         </div>
                       </div>

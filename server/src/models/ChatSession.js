@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const ChatSessionSchema = new Schema(
   {
-    userId: {
+    userID: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: false,

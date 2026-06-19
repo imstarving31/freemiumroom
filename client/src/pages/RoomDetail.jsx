@@ -263,60 +263,92 @@ export default function RoomDetail() {
         </div>
 
         {/* 2. Image Gallery Grid */}
-        {images.length === 1 ? (
-          <div className="room-gallery-grid single-image">
-            <div className="gallery-main-col" style={{ cursor: 'pointer' }} onClick={() => openLightbox(0)}>
-              <img src={images[0]} alt="Room Preview" className="img-gallery-main" onError={(e) => {
+        <div className={`airbnb-gallery-box ${images.length === 1 ? 'is-single' : images.length === 2 ? 'is-double' : 'is-grid'}`}>
+          
+          {/* Trường hợp 1 ảnh */}
+          {images.length === 1 && (
+            <img 
+              src={images[0]} 
+              className="airbnb-img-full" 
+              alt="Room" 
+              onClick={() => openLightbox(0)} 
+              onError={(e) => {
                 e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
-              }} />
-            </div>
-            <button className="show-all-photos-btn" onClick={() => openLightbox(0)}>
-              <span>Hiển thị tất cả {images.length} ảnh</span>
-            </button>
-          </div>
-        ) : images.length === 2 ? (
-          <div className="room-gallery-grid two-images">
-            <div className="gallery-main-col" style={{ cursor: 'pointer' }} onClick={() => openLightbox(0)}>
-              <img src={images[0]} alt="Room Preview 1" className="img-gallery-main" onError={(e) => {
-                e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
-              }} />
-            </div>
-            <div className="gallery-main-col" style={{ cursor: 'pointer' }} onClick={() => openLightbox(1)}>
-              <img src={images[1]} alt="Room Preview 2" className="img-gallery-main" onError={(e) => {
-                e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
-              }} />
-            </div>
-            <button className="show-all-photos-btn" onClick={() => openLightbox(0)}>
-              <span>Hiển thị tất cả {images.length} ảnh</span>
-            </button>
-          </div>
-        ) : (
-          <div className="room-gallery-grid">
-            <div className="gallery-main-col" style={{ cursor: 'pointer' }} onClick={() => openLightbox(0)}>
-              <img src={images[0]} alt="Room Preview Main" className="img-gallery-main" onError={(e) => {
-                e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
-              }} />
-            </div>
-            <div className="gallery-side-col">
-              <img src={images[1]} alt="Room Preview Sub 1" className="img-gallery-side" style={{ cursor: 'pointer' }} onClick={() => openLightbox(1)} onError={(e) => {
-                e.target.src = 'https://placehold.co/600x400?text=Hình+ảnh+phòng+trọ';
-              }} />
-              <div className="sub-image-wrapper" style={{ cursor: 'pointer' }} onClick={() => openLightbox(2)}>
-                <img src={images[2]} alt="Room Preview Sub 2" className="img-gallery-side" onError={(e) => {
+              }}
+            />
+          )}
+
+          {/* Trường hợp 2 ảnh */}
+          {images.length === 2 && (
+            <>
+              <img 
+                src={images[0]} 
+                className="airbnb-img-half" 
+                alt="Room 1" 
+                onClick={() => openLightbox(0)} 
+                onError={(e) => {
+                  e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
+                }}
+              />
+              <img 
+                src={images[1]} 
+                className="airbnb-img-half" 
+                alt="Room 2" 
+                onClick={() => openLightbox(1)} 
+                onError={(e) => {
+                  e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
+                }}
+              />
+            </>
+          )}
+
+          {/* Trường hợp 3 ảnh trở lên (Grid 1 to 2 nhỏ) */}
+          {images.length >= 3 && (
+            <>
+              <img 
+                src={images[0]} 
+                className="airbnb-img-main" 
+                alt="Room Main" 
+                onClick={() => openLightbox(0)} 
+                onError={(e) => {
+                  e.target.src = 'https://placehold.co/1200x800?text=Hình+ảnh+phòng+trọ';
+                }}
+              />
+              <img 
+                src={images[1]} 
+                className="airbnb-img-sub1" 
+                alt="Room Sub 1" 
+                onClick={() => openLightbox(1)} 
+                onError={(e) => {
                   e.target.src = 'https://placehold.co/600x400?text=Hình+ảnh+phòng+trọ';
-                }} />
+                }}
+              />
+              
+              <div className="airbnb-img-sub2-wrap" onClick={() => openLightbox(2)}>
+                <img 
+                  src={images[2]} 
+                  className="airbnb-img-sub2" 
+                  alt="Room Sub 2" 
+                  onError={(e) => {
+                    e.target.src = 'https://placehold.co/600x400?text=Hình+ảnh+phòng+trọ';
+                  }}
+                />
+                
+                {/* Overlay +X */}
                 {images.length > 3 && (
-                  <div className="gallery-overlay">
-                    <span>+{images.length - 3}</span>
+                  <div className="airbnb-overlay">
+                    <span>+{images.length - 2}</span>
                   </div>
                 )}
               </div>
-            </div>
-            <button className="show-all-photos-btn" onClick={() => openLightbox(0)}>
-              <span>Hiển thị tất cả {images.length} ảnh</span>
-            </button>
-          </div>
-        )}
+            </>
+          )}
+          
+          {/* Nút Hiển thị tất cả ảnh */}
+          <button className="show-all-photos-btn" onClick={() => openLightbox(0)}>
+            <span>Hiển thị tất cả {images.length} ảnh</span>
+          </button>
+        </div>
 
         {/* 3. Main Content Split Layout */}
         <div className="room-content-split">
@@ -327,7 +359,7 @@ export default function RoomDetail() {
             {/* Owner Section */}
             <div className="room-owner-summary">
               <div className="owner-text">
-                <h2>{room.categoryId?.categoryName || room.categoryID?.categoryName || 'Phòng cho thuê'} bởi {hostName}</h2>
+                <h2>{room.categoryID?.categoryName || 'Phòng cho thuê'} bởi {hostName}</h2>
                 <p>Diện tích: {room.area} m²</p>
               </div>
               <img src={hostAvatar} alt={hostName} className="owner-avatar-img" onError={(e) => {

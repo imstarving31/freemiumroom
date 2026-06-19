@@ -37,7 +37,6 @@ export default function PostRoom() {
   // State for dynamic address dropdowns
   const [provinces, setProvinces] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedWard, setSelectedWard] = useState('');
   const [street, setStreet] = useState('');
   const [houseNumber, setHouseNumber] = useState('');
@@ -75,7 +74,7 @@ export default function PostRoom() {
           return;
         }
 
-        const response = await fetch('https://provinces.open-api.vn/api/?depth=3');
+        const response = await fetch('https://provinces.open-api.vn/api/v2/?depth=2');
         if (response.ok) {
           const data = await response.json();
           setProvinces(data);
@@ -116,12 +115,6 @@ export default function PostRoom() {
 
   const handleProvinceChange = (e) => {
     setSelectedProvince(e.target.value);
-    setSelectedDistrict('');
-    setSelectedWard('');
-  };
-
-  const handleDistrictChange = (e) => {
-    setSelectedDistrict(e.target.value);
     setSelectedWard('');
   };
 
@@ -130,20 +123,16 @@ export default function PostRoom() {
   };
 
   const selectedProvObj = provinces.find(p => p.code === Number(selectedProvince));
-  const districtsList = selectedProvObj ? selectedProvObj.districts : [];
-  const selectedDistObj = districtsList.find(d => d.code === Number(selectedDistrict));
-  const wardsList = selectedDistObj ? selectedDistObj.wards : [];
+  const wardsList = selectedProvObj ? selectedProvObj.wards : [];
 
   const getFullAddress = () => {
     const provinceName = selectedProvObj?.name || '';
-    const districtName = selectedDistObj?.name || '';
     const wardName = wardsList.find(w => w.code === Number(selectedWard))?.name || '';
 
     const parts = [];
     if (houseNumber.trim()) parts.push(houseNumber.trim());
     if (street.trim()) parts.push(street.trim());
     if (wardName) parts.push(wardName);
-    if (districtName) parts.push(districtName);
     if (provinceName) parts.push(provinceName);
 
     return parts.join(', ');
@@ -235,8 +224,8 @@ export default function PostRoom() {
       return;
     }
     const fullAddress = getFullAddress();
-    if (!selectedProvince || !selectedDistrict || !selectedWard) {
-      showToast('Vui lòng chọn đầy đủ Tỉnh/Thành, Quận/Huyện, Phường/Xã', 'error');
+    if (!selectedProvince || !selectedWard) {
+      showToast('Vui lòng chọn đầy đủ Tỉnh/Thành, Phường/Xã', 'error');
       return;
     }
     if (!formData.price || Number(formData.price) <= 0) {
@@ -273,7 +262,6 @@ export default function PostRoom() {
 
     const fullAddress = getFullAddress();
     const provinceName = selectedProvObj?.name || '';
-    const districtName = selectedDistObj?.name || '';
     const wardName = wardsList.find(w => w.code === Number(selectedWard))?.name || '';
     const exactAddr = [houseNumber.trim(), street.trim()].filter(Boolean).join(', ');
 
@@ -284,7 +272,6 @@ export default function PostRoom() {
     sendData.append('title', formData.title.trim());
     sendData.append('address', fullAddress);
     sendData.append('province', provinceName);
-    sendData.append('district', districtName);
     sendData.append('ward', wardName);
     sendData.append('exactAddress', exactAddr);
     sendData.append('price', formData.price);
@@ -341,7 +328,6 @@ export default function PostRoom() {
         });
         setDisplayPrice('');
         setSelectedProvince('');
-        setSelectedDistrict('');
         setSelectedWard('');
         setStreet('');
         setHouseNumber('');
@@ -417,7 +403,7 @@ export default function PostRoom() {
                   Địa chỉ phòng trọ <span className="required">*</span>
                 </label>
 
-                <div className="address-selectors-row">
+                <div className="address-selectors-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div className="select-wrapper">
                     <select
                       id="province"
@@ -435,27 +421,11 @@ export default function PostRoom() {
 
                   <div className="select-wrapper">
                     <select
-                      id="district"
-                      className="form-select"
-                      value={selectedDistrict}
-                      onChange={handleDistrictChange}
-                      disabled={!selectedProvince}
-                      required
-                    >
-                      <option value="">-- Quận/Huyện --</option>
-                      {districtsList.map(d => (
-                        <option key={d.code} value={d.code}>{d.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="select-wrapper">
-                    <select
                       id="ward"
                       className="form-select"
                       value={selectedWard}
                       onChange={handleWardChange}
-                      disabled={!selectedDistrict}
+                      disabled={!selectedProvince}
                       required
                     >
                       <option value="">-- Phường/Xã --</option>

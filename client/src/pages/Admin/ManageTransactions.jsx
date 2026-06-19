@@ -263,8 +263,8 @@ export default function ManageTransactions() {
   // Filtering logic
   const filteredTransactions = transactions.filter(t => {
     // 1. Search Query
-    const userFullName = t.userId?.fullName || '';
-    const userEmail = t.userId?.email || '';
+    const userFullName = t.userID?.fullName || '';
+    const userEmail = t.userID?.email || '';
     const txnId = t._id || '';
     const matchesSearch =
       userFullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -447,11 +447,11 @@ export default function ManageTransactions() {
                         <td>
                           <div className="user-profile-cell">
                             <div className="user-avatar-circle">
-                              {txn.userId?.fullName?.charAt(0).toUpperCase() || 'U'}
+                              {txn.userID?.fullName?.charAt(0).toUpperCase() || 'U'}
                             </div>
                             <div className="user-info-text">
-                              <span className="user-fullname-span">{txn.userId?.fullName || 'Người dùng ẩn'}</span>
-                              <span className="user-email-span">{txn.userId?.email || 'N/A'}</span>
+                              <span className="user-fullname-span">{txn.userID?.fullName || 'Người dùng ẩn'}</span>
+                              <span className="user-email-span">{txn.userID?.email || 'N/A'}</span>
                             </div>
                           </div>
                         </td>

@@ -342,10 +342,10 @@ export default function ChatbotManager() {
                             })}
                           </td>
                           <td className="history-user-cell font-semibold">
-                            {session.userId ? (
+                            {session.userID ? (
                               <div className="user-profile-badge">
                                 <User size={14} className="user-icon" />
-                                <span>{session.userId.fullName}</span>
+                                <span>{session.userID.fullName}</span>
                               </div>
                             ) : (
                               <span className="guest-label">Khách vãng lai</span>

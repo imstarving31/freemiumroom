@@ -8,6 +8,7 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 const connectDB = require('./src/config/db');
+const mongoose = require('mongoose');
 const roomPostRoutes = require('./src/routes/roomPost.route');
 const authRoutes = require('./src/routes/auth.route');
 const categoryRoutes = require('./src/routes/category.route');
@@ -22,7 +23,43 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Connect to Database
-connectDB();
+connectDB().then(async () => {
+  try {
+    console.log('--- DB MIGRATION CHECK START ---');
+    const db = mongoose.connection.db;
+    
+    // 1. Rename categoryId -> categoryID in RoomPost
+    const roomPostResult = await db.collection('roomposts').updateMany(
+      { categoryId: { $exists: true } },
+      { $rename: { categoryId: 'categoryID' } }
+    );
+    if (roomPostResult.modifiedCount > 0) {
+      console.log(`Migrated ${roomPostResult.modifiedCount} RoomPost documents (categoryId -> categoryID).`);
+    }
+
+    // 2. Rename userId -> userID in Transaction
+    const txnResult = await db.collection('transactions').updateMany(
+      { userId: { $exists: true } },
+      { $rename: { userId: 'userID' } }
+    );
+    if (txnResult.modifiedCount > 0) {
+      console.log(`Migrated ${txnResult.modifiedCount} Transaction documents (userId -> userID).`);
+    }
+
+    // 3. Rename userId -> userID in ChatSession
+    const chatSessionResult = await db.collection('chatsessions').updateMany(
+      { userId: { $exists: true } },
+      { $rename: { userId: 'userID' } }
+    );
+    if (chatSessionResult.modifiedCount > 0) {
+      console.log(`Migrated ${chatSessionResult.modifiedCount} ChatSession documents (userId -> userID).`);
+    }
+
+    console.log('--- DB MIGRATION CHECK COMPLETE ---');
+  } catch (err) {
+    console.error('Migration error:', err);
+  }
+});
 
 // Middlewares
 app.use(cors());

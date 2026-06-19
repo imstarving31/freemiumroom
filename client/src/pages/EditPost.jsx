@@ -41,7 +41,6 @@ export default function EditPost() {
 
   const [provinces, setProvinces] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedWard, setSelectedWard] = useState('');
   const [street, setStreet] = useState('');
   const [houseNumber, setHouseNumber] = useState('');
@@ -72,7 +71,7 @@ export default function EditPost() {
           return;
         }
 
-        const response = await fetch('https://provinces.open-api.vn/api/?depth=3');
+        const response = await fetch('https://provinces.open-api.vn/api/v2/?depth=2');
         if (response.ok) {
           const data = await response.json();
           setProvinces(data);
@@ -127,7 +126,7 @@ export default function EditPost() {
     if (!postData || !provinces.length || !categories.length || isDataFilled) return;
 
     const post = postData;
-    const catId = post.categoryId?._id || post.categoryID?._id || '';
+    const catId = post.categoryID?._id || '';
     setFormData({
       title: post.title || '',
       price: post.price ? String(post.price) : '',
@@ -154,21 +153,15 @@ export default function EditPost() {
       setSelectedUtilities(post.utilities);
     }
 
-    // Map address names back to province/district/ward codes
+    // Map address names back to province/ward codes
     if (post.province) {
       const provObj = provinces.find(p => p.name === post.province);
       if (provObj) {
         setSelectedProvince(String(provObj.code));
-        if (post.district) {
-          const distObj = provObj.districts?.find(d => d.name === post.district);
-          if (distObj) {
-            setSelectedDistrict(String(distObj.code));
-            if (post.ward) {
-              const wardObj = distObj.wards?.find(w => w.name === post.ward);
-              if (wardObj) {
-                setSelectedWard(String(wardObj.code));
-              }
-            }
+        if (post.ward) {
+          const wardObj = provObj.wards?.find(w => w.name === post.ward);
+          if (wardObj) {
+            setSelectedWard(String(wardObj.code));
           }
         }
       }
@@ -201,12 +194,6 @@ export default function EditPost() {
 
   const handleProvinceChange = (e) => {
     setSelectedProvince(e.target.value);
-    setSelectedDistrict('');
-    setSelectedWard('');
-  };
-
-  const handleDistrictChange = (e) => {
-    setSelectedDistrict(e.target.value);
     setSelectedWard('');
   };
 
@@ -215,20 +202,16 @@ export default function EditPost() {
   };
 
   const selectedProvObj = provinces.find(p => p.code === Number(selectedProvince));
-  const districtsList = selectedProvObj ? selectedProvObj.districts : [];
-  const selectedDistObj = districtsList.find(d => d.code === Number(selectedDistrict));
-  const wardsList = selectedDistObj ? selectedDistObj.wards : [];
+  const wardsList = selectedProvObj ? selectedProvObj.wards : [];
 
   const getFullAddress = () => {
     const provinceName = selectedProvObj?.name || '';
-    const districtName = selectedDistObj?.name || '';
     const wardName = wardsList.find(w => w.code === Number(selectedWard))?.name || '';
 
     const parts = [];
     if (houseNumber.trim()) parts.push(houseNumber.trim());
     if (street.trim()) parts.push(street.trim());
     if (wardName) parts.push(wardName);
-    if (districtName) parts.push(districtName);
     if (provinceName) parts.push(provinceName);
 
     return parts.join(', ');
@@ -316,8 +299,8 @@ export default function EditPost() {
       showToast('Vui lòng nhập tiêu đề bài đăng', 'error');
       return;
     }
-    if (!selectedProvince || !selectedDistrict || !selectedWard) {
-      showToast('Vui lòng chọn đầy đủ Tỉnh/Thành, Quận/Huyện, Phường/Xã', 'error');
+    if (!selectedProvince || !selectedWard) {
+      showToast('Vui lòng chọn đầy đủ Tỉnh/Thành, Phường/Xã', 'error');
       return;
     }
     if (!formData.price || Number(formData.price) <= 0) {
@@ -355,7 +338,6 @@ export default function EditPost() {
 
     const fullAddress = getFullAddress();
     const provinceName = selectedProvObj?.name || '';
-    const districtName = selectedDistObj?.name || '';
     const wardName = wardsList.find(w => w.code === Number(selectedWard))?.name || '';
     const exactAddr = [houseNumber.trim(), street.trim()].filter(Boolean).join(', ');
 
@@ -365,7 +347,6 @@ export default function EditPost() {
     sendData.append('title', formData.title.trim());
     sendData.append('address', fullAddress);
     sendData.append('province', provinceName);
-    sendData.append('district', districtName);
     sendData.append('ward', wardName);
     sendData.append('exactAddress', exactAddr);
     sendData.append('price', formData.price);
@@ -496,13 +477,7 @@ export default function EditPost() {
                       <option key={prov.code} value={prov.code}>{prov.name}</option>
                     ))}
                   </select>
-                  <select className="form-select" value={selectedDistrict} onChange={handleDistrictChange} disabled={!selectedProvince}>
-                    <option value="">-- Chọn Quận / Huyện --</option>
-                    {districtsList.map((dist) => (
-                      <option key={dist.code} value={dist.code}>{dist.name}</option>
-                    ))}
-                  </select>
-                  <select className="form-select" value={selectedWard} onChange={handleWardChange} disabled={!selectedDistrict}>
+                  <select className="form-select" value={selectedWard} onChange={handleWardChange} disabled={!selectedProvince}>
                     <option value="">-- Chọn Phường / Xã --</option>
                     {wardsList.map((w) => (
                       <option key={w.code} value={w.code}>{w.name}</option>

@@ -157,7 +157,7 @@ exports.getChatSessions = async (req, res) => {
 
     const total = await ChatSession.countDocuments();
     const sessions = await ChatSession.find()
-      .populate('userId', 'fullName email avatar')
+      .populate('userID', 'fullName email avatar')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);

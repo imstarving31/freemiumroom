@@ -35,7 +35,6 @@ export default function FilterModal({ isOpen, onClose }) {
   // Local/Temporary state for filters
   const [tempCategoryId, setTempCategoryId] = useState('');
   const [tempProvince, setTempProvince] = useState('');
-  const [tempDistrict, setTempDistrict] = useState('');
   const [tempWard, setTempWard] = useState('');
   const [tempMinPrice, setTempMinPrice] = useState('');
   const [tempMaxPrice, setTempMaxPrice] = useState('');
@@ -63,7 +62,7 @@ export default function FilterModal({ isOpen, onClose }) {
   useEffect(() => {
     if (cachedGeoData) return;
     setGeoLoading(true);
-    fetch('https://provinces.open-api.vn/api/?depth=3')
+    fetch('https://provinces.open-api.vn/api/v2/?depth=2')
       .then(res => res.json())
       .then(data => {
         cachedGeoData = data;
@@ -81,7 +80,6 @@ export default function FilterModal({ isOpen, onClose }) {
     if (isOpen) {
       setTempCategoryId(searchParams.get('categoryId') || '');
       setTempProvince(searchParams.get('province') || '');
-      setTempDistrict(searchParams.get('district') || '');
       setTempWard(searchParams.get('ward') || '');
       setTempMinPrice(searchParams.get('minPrice') || '');
       setTempMaxPrice(searchParams.get('maxPrice') || '');
@@ -96,7 +94,6 @@ export default function FilterModal({ isOpen, onClose }) {
 
   // Find cascading objects for selection
   const activeProvinceObj = geoData.find(p => p.name === tempProvince);
-  const activeDistrictObj = activeProvinceObj?.districts?.find(d => d.name === tempDistrict);
 
   // Handlers for temporary states
   const handleCategoryClick = (id) => {
@@ -134,13 +131,6 @@ export default function FilterModal({ isOpen, onClose }) {
   const handleProvinceChange = (e) => {
     const val = e.target.value;
     setTempProvince(val === 'all' ? '' : val);
-    setTempDistrict('');
-    setTempWard('');
-  };
-
-  const handleDistrictChange = (e) => {
-    const val = e.target.value;
-    setTempDistrict(val === 'all' ? '' : val);
     setTempWard('');
   };
 
@@ -152,7 +142,6 @@ export default function FilterModal({ isOpen, onClose }) {
   const handleResetTempFilters = () => {
     setTempCategoryId('');
     setTempProvince('');
-    setTempDistrict('');
     setTempWard('');
     setTempMinPrice('');
     setTempMaxPrice('');
@@ -168,12 +157,11 @@ export default function FilterModal({ isOpen, onClose }) {
     if (tempCategoryId) newParams.set('categoryId', tempCategoryId);
     else newParams.delete('categoryId');
 
-    // Set or delete province/district/ward
+    // Set or delete province/ward
     if (tempProvince) newParams.set('province', tempProvince);
     else newParams.delete('province');
     
-    if (tempDistrict) newParams.set('district', tempDistrict);
-    else newParams.delete('district');
+    newParams.delete('district'); // Ensure legacy district parameter is cleaned up
 
     if (tempWard) newParams.set('ward', tempWard);
     else newParams.delete('ward');
@@ -261,7 +249,7 @@ export default function FilterModal({ isOpen, onClose }) {
           {/* Area Geography dropdowns */}
           <div className="filter-section">
             <label className="filter-section-label">Lọc theo khu vực</label>
-            <div className="geo-selects-container">
+            <div className="geo-selects-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               {/* Province */}
               <div className="select-wrapper">
                 <MapPin size={14} className="select-icon-left" />
@@ -284,22 +272,6 @@ export default function FilterModal({ isOpen, onClose }) {
                 </select>
               </div>
 
-              {/* District */}
-              <div className="select-wrapper">
-                <MapPin size={14} className="select-icon-left" />
-                <select
-                  value={tempDistrict || 'all'}
-                  onChange={handleDistrictChange}
-                  className="geo-select"
-                  disabled={!tempProvince || geoLoading}
-                >
-                  <option value="all">Chọn Quận/Huyện</option>
-                  {activeProvinceObj?.districts?.map((d) => (
-                    <option key={d.code} value={d.name}>{d.name}</option>
-                  ))}
-                </select>
-              </div>
-
               {/* Ward */}
               <div className="select-wrapper">
                 <MapPin size={14} className="select-icon-left" />
@@ -307,10 +279,10 @@ export default function FilterModal({ isOpen, onClose }) {
                   value={tempWard || 'all'}
                   onChange={handleWardChange}
                   className="geo-select"
-                  disabled={!tempDistrict || geoLoading}
+                  disabled={!tempProvince || geoLoading}
                 >
                   <option value="all">Chọn Phường/Xã</option>
-                  {activeDistrictObj?.wards?.map((w) => (
+                  {activeProvinceObj?.wards?.map((w) => (
                     <option key={w.code} value={w.name}>{w.name}</option>
                   ))}
                 </select>

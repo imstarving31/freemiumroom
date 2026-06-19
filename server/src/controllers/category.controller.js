@@ -156,13 +156,7 @@ exports.deleteCategory = async (req, res) => {
     const { id } = req.params;
 
     // Check if there are any room posts utilizing this category
-    // Using both categoryId and categoryID since there could be mismatching casings in older records
-    const postCount = await RoomPost.countDocuments({
-      $or: [
-        { categoryId: id },
-        { categoryID: id }
-      ]
-    });
+    const postCount = await RoomPost.countDocuments({ categoryID: id });
 
     if (postCount > 0) {
       return res.status(400).json({

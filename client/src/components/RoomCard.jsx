@@ -74,7 +74,7 @@ export default function RoomCard({ post, index, formatPrice, onViewDetail }) {
     : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=600&auto=format&fit=crop';
 
   const displayArea = post.area || (20 + (index * 5));
-  const displayType = post.categoryId?.categoryName || post.categoryID?.categoryName || (index % 2 === 0 ? '1 PN' : 'Ở ghép');
+  const displayType = post.categoryID?.categoryName || (index % 2 === 0 ? '1 PN' : 'Ở ghép');
   const priceText = formatPrice ? formatPrice(post.price) : formatPriceLocal(post.price);
   const contactPhone = post.userID?.phoneNumber || post.contactPhone || '';
 

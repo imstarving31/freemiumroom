@@ -18,7 +18,7 @@ exports.createPaymentUrl = async (req, res) => {
 
     // 1. Create a new transaction in DB
     const transaction = new Transaction({
-      userId,
+      userID: userId,
       amount,
       transactionType: 'Deposit',
       status: 'Pending'
@@ -140,14 +140,14 @@ exports.vnpayReturn = async (req, res) => {
 
           // Cộng tiền vào ví User
           await User.findByIdAndUpdate(
-            transaction.userId,
+            transaction.userID,
             { $inc: { balance: transaction.amount } }
           );
 
           // Phát tín hiệu thông báo cho Admin qua Socket.io
           const io = req.app.get('socketio');
           if (io) {
-            const user = await User.findById(transaction.userId);
+            const user = await User.findById(transaction.userID);
             const userName = user ? user.fullName : 'Thành viên';
             const formattedAmount = transaction.amount.toLocaleString('vi-VN');
             io.emit('admin_notification', {
@@ -212,14 +212,14 @@ exports.vnpayIpn = async (req, res) => {
 
         // Cộng tiền vào ví User
         await User.findByIdAndUpdate(
-          transaction.userId,
+          transaction.userID,
           { $inc: { balance: transaction.amount } }
         );
 
         // Phát tín hiệu thông báo cho Admin qua Socket.io
         const io = req.app.get('socketio');
         if (io) {
-          const user = await User.findById(transaction.userId);
+          const user = await User.findById(transaction.userID);
           const userName = user ? user.fullName : 'Thành viên';
           const formattedAmount = transaction.amount.toLocaleString('vi-VN');
           io.emit('admin_notification', {
@@ -367,14 +367,14 @@ exports.updateTransactionStatus = async (req, res) => {
 
     // Cộng tiền vào ví User
     await User.findByIdAndUpdate(
-      transaction.userId,
+      transaction.userID,
       { $inc: { balance: transaction.amount } }
     );
 
     // Phát tín hiệu thông báo cho Admin qua Socket.io
     const io = req.app.get('socketio');
     if (io) {
-      const user = await User.findById(transaction.userId);
+      const user = await User.findById(transaction.userID);
       const userName = user ? user.fullName : 'Thành viên';
       const formattedAmount = transaction.amount.toLocaleString('vi-VN');
       io.emit('admin_notification', {
@@ -400,7 +400,7 @@ exports.updateTransactionStatus = async (req, res) => {
 exports.getTransactionHistory = async (req, res) => {
   try {
     const userId = req.user.id;
-    const transactions = await Transaction.find({ userId }).sort({ createdAt: -1 });
+    const transactions = await Transaction.find({ userID: userId }).sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,

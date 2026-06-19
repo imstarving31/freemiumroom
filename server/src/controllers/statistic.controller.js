@@ -102,7 +102,7 @@ exports.getOverviewStats = async (req, res) => {
 
     const [totalUsers, totalRoomPosts, pendingRoomPosts, revenueResult] = await Promise.all([
       User.countDocuments(filterStage),
-      RoomPost.countDocuments(filterStage),
+      RoomPost.countDocuments({ ...filterStage, status: 'Approved' }),
       RoomPost.countDocuments({ ...filterStage, status: 'Pending' }),
       Transaction.aggregate([
         {
@@ -149,6 +149,7 @@ exports.getPostsByProvince = async (req, res) => {
 
     const matchStage = {
       province: { $ne: null, $exists: true },
+      status: 'Approved',
       createdAt: { $gte: start, $lte: end }
     };
 
@@ -244,6 +245,7 @@ exports.getPostsByTime = async (req, res) => {
     const { start, end } = getFilterDateRange(timeRange, startDate, endDate);
 
     const matchStage = {
+      status: 'Approved',
       createdAt: { $gte: start, $lte: end }
     };
 
@@ -395,6 +397,7 @@ exports.getPostsByRegion = async (req, res) => {
 
     const matchStage = {
       province: { $ne: null, $exists: true },
+      status: 'Approved',
       createdAt: { $gte: start, $lte: end }
     };
 
@@ -440,9 +443,9 @@ exports.exportReport = async (req, res) => {
       User.countDocuments({ createdAt: { $gte: start, $lte: end } }),
       RoomPost.find({ createdAt: { $gte: start, $lte: end } })
         .populate('userID', 'fullName email')
-        .select('title province district price area status createdAt'),
+        .select('title province price area status createdAt'),
       Transaction.find({ createdAt: { $gte: start, $lte: end } })
-        .populate('userId', 'fullName email')
+        .populate('userID', 'fullName email')
         .select('amount transactionType status description createdAt')
     ]);
 
@@ -467,7 +470,7 @@ exports.exportReport = async (req, res) => {
       { 'Chỉ số': 'Thời gian bắt đầu', 'Giá trị': start.toLocaleDateString('vi-VN') },
       { 'Chỉ số': 'Thời gian kết thúc', 'Giá trị': end.toLocaleDateString('vi-VN') },
       { 'Chỉ số': 'Thành viên mới', 'Giá trị': usersCount },
-      { 'Chỉ số': 'Tin đăng mới', 'Giá trị': posts.length },
+      { 'Chỉ số': 'Tin đăng mới (Đã duyệt)', 'Giá trị': posts.filter(p => p.status === 'Approved').length },
       { 'Chỉ số': 'Bài đang chờ duyệt', 'Giá trị': posts.filter(p => p.status === 'Pending').length },
       { 'Chỉ số': 'Bài đã duyệt', 'Giá trị': posts.filter(p => p.status === 'Approved').length },
       { 'Chỉ số': 'Doanh thu phát sinh (VNĐ)', 'Giá trị': totalRevenue }
@@ -482,7 +485,6 @@ exports.exportReport = async (req, res) => {
       'Người đăng': p.userID ? p.userID.fullName : 'Ẩn danh',
       'Email': p.userID ? p.userID.email : 'N/A',
       'Tỉnh/Thành': p.province || 'N/A',
-      'Quận/Huyện': p.district || 'N/A',
       'Giá thuê (VNĐ)': p.price,
       'Diện tích (m2)': p.area,
       'Trạng thái': p.status,
@@ -494,8 +496,8 @@ exports.exportReport = async (req, res) => {
     // Sheet 3: Lịch sử giao dịch
     const txnsData = transactions.map((t, idx) => ({
       'STT': idx + 1,
-      'Thành viên': t.userId ? t.userId.fullName : 'Ẩn danh',
-      'Email': t.userId ? t.userId.email : 'N/A',
+      'Thành viên': t.userID ? t.userID.fullName : 'Ẩn danh',
+      'Email': t.userID ? t.userID.email : 'N/A',
       'Số tiền': t.amount,
       'Loại giao dịch': t.transactionType === 'Deposit' ? 'Nạp tiền' : 'Thanh toán VIP',
       'Trạng thái': t.status,

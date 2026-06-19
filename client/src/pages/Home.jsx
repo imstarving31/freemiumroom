@@ -25,24 +25,22 @@ export default function Home() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  useEffect(() => {
-    if (currentUser && currentUser.role === 'Admin') {
-      navigate('/admin/dashboard', { replace: true });
-    }
-  }, [currentUser, navigate]);
-
-  // Check if any filters are active
   const hasActiveFilters =
     searchParams.get('searchTerm') ||
     searchParams.get('categoryId') ||
     searchParams.get('province') ||
-    searchParams.get('district') ||
     searchParams.get('ward') ||
     searchParams.get('minPrice') ||
     searchParams.get('maxPrice') ||
     searchParams.get('minArea') ||
     searchParams.get('maxArea') ||
     searchParams.get('utilities');
+
+  useEffect(() => {
+    if (currentUser && currentUser.role === 'Admin') {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [currentUser, navigate]);
 
   // Fetch posts from backend matching current searchParams
   useEffect(() => {

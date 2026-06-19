@@ -113,22 +113,35 @@ exports.handleChat = async (req, res) => {
       // Extract location keywords dynamically from the database to match user messages
       const baseLocations = ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ'];
       const provincesInDb = await RoomPost.distinct('province', { status: 'Approved' });
-      const districtsInDb = await RoomPost.distinct('district', { status: 'Approved' });
-      const locationKeywords = [...new Set([...baseLocations, ...provincesInDb, ...districtsInDb])].filter(Boolean);
+      const locationKeywords = [...new Set([...baseLocations, ...provincesInDb])].filter(Boolean);
 
-      const matchedLocations = locationKeywords.filter((loc) =>
-        message.toLowerCase().includes(loc.toLowerCase())
-      );
+      const cleanKeyword = (name) => {
+        return name ? name.replace(/^(tỉnh|thành phố|phường|xã|quận|huyện)\s+/i, '').trim() : '';
+      };
+
+      const matchedLocations = locationKeywords.filter((loc) => {
+        const cleanLoc = cleanKeyword(loc);
+        return (
+          message.toLowerCase().includes(loc.toLowerCase()) ||
+          (cleanLoc && message.toLowerCase().includes(cleanLoc.toLowerCase()))
+        );
+      });
 
       if (matchedLocations.length > 0) {
-        // Search across province, district, and address fields
-        filter.$or = matchedLocations.map((loc) => ({
-          $or: [
-            { province: { $regex: loc, $options: 'i' } },
-            { district: { $regex: loc, $options: 'i' } },
-            { address: { $regex: loc, $options: 'i' } }
-          ]
-        }));
+        // Search across province and address fields
+        filter.$or = matchedLocations.map((loc) => {
+          const cleanLoc = cleanKeyword(loc);
+          return {
+            $or: [
+              { province: { $regex: loc, $options: 'i' } },
+              { address: { $regex: loc, $options: 'i' } },
+              ...(cleanLoc ? [
+                { province: { $regex: cleanLoc, $options: 'i' } },
+                { address: { $regex: cleanLoc, $options: 'i' } }
+              ] : [])
+            ]
+          };
+        });
       }
 
       // Extract price hints from message
@@ -147,7 +160,7 @@ exports.handleChat = async (req, res) => {
       }
 
       roomPostResults = await RoomPost.find(filter)
-        .select('_id title address province district price area description utilities contactPhone')
+        .select('_id title address province price area description utilities contactPhone')
         .sort({ createdAt: -1 })
         .limit(10);
     }
@@ -188,7 +201,7 @@ exports.handleChat = async (req, res) => {
 
     // Save history to Database
     await ChatSession.create({
-      userId: req.user ? req.user._id : null,
+      userID: req.user ? req.user._id : null,
       userMessage: message,
       botReply: reply
     });
